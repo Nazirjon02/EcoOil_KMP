@@ -1,6 +1,5 @@
 package org.example.project
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,10 +8,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,21 +36,27 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.compose_multiplatform
+import ecooil_kmp.composeapp.generated.resources.ecooil_text
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        Box(modifier = Modifier.fillMaxSize().background(Color(0xFF00A8A8)) // бирюзовый фон как на скрине
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF00A8A8))
+                .imePadding() // КЛЮЧЕВАЯ СТРОКА — поднимает контент над клавиатурой
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-                    .align(Alignment.Center),
+                    .verticalScroll(rememberScrollState()) // Скролл на весь экран
+                    .padding(horizontal = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(80.dp)) // Отступ сверху, чтобы было красиво
 
-                // Белый карточка-контейнер
+                // Белая карточка
                 Card(
                     shape = RoundedCornerShape(24.dp),
                     elevation = CardDefaults.cardElevation(12.dp),
@@ -58,11 +65,17 @@ fun App() {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 32.dp, vertical = 40.dp),
+                            .padding(start = 20.dp, top = 5.dp, end = 20.dp, bottom = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Image(
+                            painter = painterResource(Res.drawable.ecooil_text),
+                            contentDescription = "Логотип EcoOil",
+                            modifier = Modifier
+                                .height(120.dp)
+                                .padding(bottom = 10.dp)
+                        )
 
-                        // Заголовок «Авторизация»
                         Text(
                             text = "Авторизация",
                             fontSize = 24.sp,
@@ -71,34 +84,25 @@ fun App() {
                             modifier = Modifier.padding(bottom = 32.dp)
                         )
 
-                        // Подзаголовок
                         Text(
                             text = "Пожалуйста, введите свой номер телефона",
-                            fontSize = 16.sp,
-                            color = Color(0xFF666666),
+                            fontSize = 14.sp,
+                            color = Color(0xFF00A8A8),
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 32.dp)
+                            modifier = Modifier.padding(bottom = 10.dp)
                         )
 
-                        // Поле ввода телефона
                         var phone by remember { mutableStateOf("") }
 
                         OutlinedTextField(
                             value = phone,
                             onValueChange = { newText ->
-                                // Ограничиваем только цифры и максимум 9 после +992
                                 val filtered = newText.filter { it.isDigit() }
-                                if (filtered.length <= 9) {
-                                    phone = filtered
-                                }
+                                if (filtered.length <= 9) phone = filtered
                             },
                             label = { Text("Номер телефона") },
                             leadingIcon = {
-                                Text(
-                                    text = "+992",
-                                    color = Color(0xFF00A8A8),
-                                    fontWeight = FontWeight.Medium
-                                )
+                                Text("+992", color = Color(0xFF00A8A8), fontWeight = FontWeight.Medium)
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             singleLine = true,
@@ -121,10 +125,9 @@ fun App() {
 
                         Spacer(modifier = Modifier.height(40.dp))
 
-                        // Кнопка «Далее»
                         Button(
-                            onClick = { /* TODO */ },
-                            enabled = phone.length == 9, // активируется только когда 9 цифр
+                            onClick = { /* TODO: отправить код */ },
+                            enabled = phone.length == 9,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
@@ -134,14 +137,12 @@ fun App() {
                                 disabledContainerColor = Color(0xFFAAD7D7)
                             )
                         ) {
-                            Text(
-                                text = "Далее",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Text("Далее", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(100.dp)) // Отступ снизу, чтобы можно было проскроллить
             }
         }
     }
