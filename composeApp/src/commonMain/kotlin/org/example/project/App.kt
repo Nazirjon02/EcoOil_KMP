@@ -31,15 +31,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ecooil_kmp.composeapp.generated.resources.Res
+import ecooil_kmp.composeapp.generated.resources.ecooil_text
+import kotlinx.coroutines.launch
+import org.example.networking.InsultCensorClient
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-import ecooil_kmp.composeapp.generated.resources.Res
-import ecooil_kmp.composeapp.generated.resources.compose_multiplatform
-import ecooil_kmp.composeapp.generated.resources.ecooil_text
+import org.example.util.NetworkError
+import org.example.util.onError
+import org.example.util.onSuccess
+
 @Composable
 @Preview
-fun App() {
+fun App(client: InsultCensorClient) {
+    val scope = rememberCoroutineScope()
     MaterialTheme {
         Box(
             modifier = Modifier
@@ -102,7 +108,11 @@ fun App() {
                             },
                             label = { Text("Номер телефона") },
                             leadingIcon = {
-                                Text("+992", color = Color(0xFF00A8A8), fontWeight = FontWeight.Medium)
+                                Text(
+                                    "+992",
+                                    color = Color(0xFF00A8A8),
+                                    fontWeight = FontWeight.Medium
+                                )
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             singleLine = true,
@@ -126,8 +136,14 @@ fun App() {
                         Spacer(modifier = Modifier.height(40.dp))
 
                         Button(
-                            onClick = { /* TODO: отправить код */ },
-                            enabled = phone.length == 9,
+                            onClick = {
+                                scope.launch {
+                                    client.censorWords(phone)
+                                        .onSuccess { println("Ktor_Success $it") }
+                                        .onError { println("Ktor_Error $it") }
+                                }
+                            },
+//                            enabled = phone.length == 9,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp),
