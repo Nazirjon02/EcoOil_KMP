@@ -1,4 +1,5 @@
 package org.example.project
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
+import ecooil_kmp.composeapp.generated.resources.sms
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.example.networking.InsultCensorClient
@@ -102,7 +105,7 @@ fun App(client: InsultCensorClient?) {
 
                         Text(
                             text = if (!isSmsStep) "Авторизация" else "Пожалуйста, введите код, отправленный на ваш",
-                            fontSize =if (!isSmsStep) 24.sp else 18.sp,
+                            fontSize = if (!isSmsStep) 24.sp else 18.sp,
                             textAlign = TextAlign.Center,
                             fontWeight = if (!isSmsStep) FontWeight.Bold else FontWeight.Medium,
                             color = if (!isSmsStep) Color(0xFF00A8A8) else Color.Black,
@@ -156,11 +159,15 @@ fun App(client: InsultCensorClient?) {
                                         fontWeight = FontWeight.Medium
                                     )
                                 } else {
-//                                    Icon(
-//                                        imageVector = Icons.Outlined.Email,
-//                                        contentDescription = "SMS",
-//                                        tint = Color(0xFF00A8A8)
-//                                    )
+                                    Icon(
+                                        painter = painterResource(Res.drawable.sms),
+                                        contentDescription = "SMS",
+                                        tint = Color(0xFF00A8A8),
+                                        modifier = Modifier
+                                            .height(24.dp)
+                                            .width(24.dp)
+
+                                    )
                                 }
                             },
                             keyboardOptions = KeyboardOptions(
