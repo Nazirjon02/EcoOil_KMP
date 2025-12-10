@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
 import ecooil_kmp.composeapp.generated.resources.sms
@@ -53,7 +54,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App(client: InsultCensorClient?) {
+fun AppContent(client: InsultCensorClient?) {
+    val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow
+
     val scope = rememberCoroutineScope()
 
     // Состояния
@@ -288,6 +291,7 @@ fun App(client: InsultCensorClient?) {
                                     // подтверждение SMS кода
                                     // здесь логика отправки кода для проверки
                                     // например: verifyCode(phone)
+                                    navigator.replace(MainRootScreen)
                                     println("Отправляем/проверяем код: $phone")
                                 }
                             },

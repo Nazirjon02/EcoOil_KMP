@@ -28,6 +28,8 @@ kotlin {
     }
 
     sourceSets {
+
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -46,6 +48,11 @@ kotlin {
 
 
             implementation(libs.bundles.ktor)
+
+            api("cafe.adriel.voyager:voyager-navigator:1.0.0")
+            api("cafe.adriel.voyager:voyager-bottom-sheet-navigator:1.0.0")
+            api("cafe.adriel.voyager:voyager-tab-navigator:1.0.0")
+            api("cafe.adriel.voyager:voyager-transitions:1.0.0")
 
         }
         nativeMain.dependencies {
