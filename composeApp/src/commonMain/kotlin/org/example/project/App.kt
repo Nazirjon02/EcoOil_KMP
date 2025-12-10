@@ -46,7 +46,10 @@ import ecooil_kmp.composeapp.generated.resources.ecooil_text
 import ecooil_kmp.composeapp.generated.resources.sms
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
+import org.example.networking.PhoneRequest
+import org.example.networking.PhoneResponse
 import org.example.util.onError
 import org.example.util.onSuccess
 import org.jetbrains.compose.resources.painterResource
@@ -252,9 +255,14 @@ fun AppContent(client: InsultCensorClient?) {
                                             isLoading = false
                                             return@launch
                                         }
+                                        val hash = Until.sha256(phone +  Until.getDeviceId())
 
-                                        client?.censorWords(phone)
-                                            ?.onSuccess {
+                                        val result = client?.request<PhoneResponse>(
+                                            path = Constant.chackPhoneNumber,
+                                            bodyObj = PhoneRequest(phone, Until.getDeviceId(),hash)
+                                        )
+
+                                        result?.onSuccess {
                                                 isLoading = false
                                                 savedPhoneNumber = phone
                                                 phone = ""
