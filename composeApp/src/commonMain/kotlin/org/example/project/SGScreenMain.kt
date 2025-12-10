@@ -1,6 +1,7 @@
 package org.example.project
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -39,38 +40,42 @@ fun SGScreenMain() {
 
         // ---- TOP CARD ----
         Card(
-            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(8.dp)
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 32.dp)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(vertical = 24.dp)
             ) {
-
-                Text(
-                    text = "EcoOil",
-                    fontSize = 35.sp,
-                    fontWeight = FontWeight.Bold
+                Image(
+                    painter = painterResource(Res.drawable.ecooil_text),
+                    contentDescription = "EcoOil",
+                    modifier = Modifier.height(60.dp)
                 )
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Text("Бонус", fontSize = 22.sp)
-                    Text("Баланс", fontSize = 22.sp)
+                    BalanceItem(label = "БОНУС", amount = "10.3 C", amountColor = Color(0xFFFF6B00))
+                    Spacer(modifier = Modifier.width(1.dp).height(40.dp).background(Color(0xFFE0E0E0)))
+                    BalanceItem(label = "БАЛАНС", amount = "20.0 C", amountColor = Color(0xFF00A8A8))
                 }
 
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("10c", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-                    Text("10c", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "SG Lite",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
             }
         }
 

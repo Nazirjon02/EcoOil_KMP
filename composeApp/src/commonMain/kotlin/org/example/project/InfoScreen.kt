@@ -17,7 +17,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun SGScreenContent() {
+fun InfoScreenContent() {
     val scrollState = rememberScrollState()
 
     Column(
@@ -155,9 +155,9 @@ private fun ContactRow(circleColor: Color, text: String) {
     }
 }
 
-object SGScreen : Screen {
+object InfoScreen : Screen {
     @Composable
     override fun Content() {
-        SGScreenContent()
+        InfoScreenContent()
     }
 }

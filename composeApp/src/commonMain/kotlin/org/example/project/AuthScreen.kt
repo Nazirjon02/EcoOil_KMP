@@ -7,7 +7,7 @@ import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.createHttpClient
 
-object AppScreen : Screen {
+object AuthScreen : Screen {
 
     @Composable
     override fun Content() {

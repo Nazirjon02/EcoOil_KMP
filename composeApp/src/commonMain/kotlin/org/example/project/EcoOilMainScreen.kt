@@ -188,16 +188,12 @@ fun EcoOilMainScreen() {
                 Spacer(modifier = Modifier.height(100.dp))
             }
 
-            // === Bottom Navigation Bar ===
-            BottomNavigationBar(
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
         }
     }
 }
 
 @Composable
-private fun BalanceItem(label: String, amount: String, amountColor: Color) {
+fun BalanceItem(label: String, amount: String, amountColor: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = label, fontSize = 14.sp, color = Color.Gray)
         Spacer(modifier = Modifier.height(4.dp))

@@ -6,8 +6,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.*
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.home
@@ -78,7 +76,7 @@ object EmptyTab : Tab {
 
     @Composable
     override fun Content() {
-        EmptyScreen.Content()
+        QrScreen.Content()
     }
 }
 
@@ -92,6 +90,6 @@ object SGTab : Tab {
 
     @Composable
     override fun Content() {
-        SGScreenContent()
+        InfoScreenContent()
     }
 }
