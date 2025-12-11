@@ -36,3 +36,10 @@ actual object Until {
         return UIDevice.currentDevice.identifierForVendor?.UUIDString ?: "unknown"
     }
 }
+
+actual object ToastManager {
+    actual fun show(message: String) {
+        // Здесь можно потом реализовать свой кастомный "тоаст" для iOS
+        println("Toast(iOS): $message")
+    }
+}

@@ -48,7 +48,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
-import org.example.networking.PhoneRequest
 import org.example.networking.PhoneResponse
 import org.example.util.onError
 import org.example.util.onSuccess
@@ -256,18 +255,23 @@ fun AppContent(client: InsultCensorClient?) {
                                             return@launch
                                         }
                                         val hash = Until.sha256(phone +  Until.getDeviceId())
+                                        val map = hashMapOf(
+                                            "PhoneNumber" to phone,
+                                            "DeviceId" to Until.getDeviceId(),
+                                            "Hash" to hash
+                                        )
 
                                         val result = client?.request<PhoneResponse>(
                                             path = Constant.chackPhoneNumber,
-                                            bodyObj = PhoneRequest(phone, Until.getDeviceId(),hash)
+                                            params = map ,
                                         )
 
-                                        result?.onSuccess {
+                                        result?.onSuccess { body->
+                                            if (body.code==1) {
                                                 isLoading = false
                                                 savedPhoneNumber = phone
                                                 phone = ""
                                                 isSmsStep = true
-
                                                 // старт таймера
                                                 scope.launch {
                                                     timer = 60
@@ -276,9 +280,12 @@ fun AppContent(client: InsultCensorClient?) {
                                                         timer--
                                                     }
                                                 }
+                                            }else{
+                                                ToastManager.show(body.message)
+                                                isLoading = false
                                             }
-                                            ?.onError {
-                                                // обработка ошибки
+                                            }?.onError {
+                                            // обработка ошибки
                                                 isLoading = false
                                             } ?: run {
                                             // если client == null — просто переключаемся (для preview)
@@ -296,13 +303,48 @@ fun AppContent(client: InsultCensorClient?) {
                                         }
                                     }
                                 } else {
-                                    // подтверждение SMS кода
-                                    // здесь логика отправки кода для проверки
-                                    // например: verifyCode(phone)
-                                    navigator.replace(MainRootScreen)
+                                    scope.launch {
+                                        if (isLoading) return@launch
+                                        isLoading = true
+
+                                        if (phone.length != 4) {
+                                            ToastManager.show("Check SMS")
+                                            isLoading = false
+                                            return@launch
+                                        }
+
+                                        val hash = Until.sha256(savedPhoneNumber +  Until.getDeviceId()+phone)
+                                        val map = hashMapOf(
+                                            "PhoneNumber" to phone,
+                                            "DeviceId" to Until.getDeviceId(),
+                                            "Code" to phone,
+                                            "Hash" to hash
+                                        )
+
+                                        val result = client?.request<PhoneResponse>(
+                                            path = Constant.checkSMS,
+                                            params = map ,
+                                        )
+
+                                        result?.onSuccess { body->
+                                            if (body.code==1) {
+                                                navigator.replace(MainRootScreen)
+                                            }else{
+                                                navigator.replace(MainRootScreen)
+                                                ToastManager.show(body.message)
+                                                isLoading = false
+                                            }
+                                        }?.onError {
+                                            isLoading = false
+                                        } ?: run {
+                                            isLoading = false
+                                        }
+                                    }
+
                                     println("Отправляем/проверяем код: $phone")
                                 }
                             },
+
                             enabled = !isLoading, // кнопка выключена во время загрузки
                             modifier = Modifier
                                 .fillMaxWidth()

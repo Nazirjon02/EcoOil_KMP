@@ -2,7 +2,7 @@ package org.example.networking
 
 object Constant {
     //POST
-    const val baseUrl="http://95.142.86.183:8080/"
+    const val baseUrl="http://95.142.86.183:8080"
     const val chackPhoneNumber="/check_phone_number"
     const val checkSMS="/check_verification_code"
     const val getTransactions="/get_transactions"

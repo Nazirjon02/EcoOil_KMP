@@ -3,7 +3,13 @@ package org.example.networking
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PhoneRequest(val phone: String,val deviceId:String,val hash:String)
+data class PhoneResponse(
+    val code: Int,
+    val message: String,
+    val data: PhoneData? = null
+)
 
 @Serializable
-data class PhoneResponse(val exists: Boolean)
+data class PhoneData(
+    val exists: Boolean? = null
+)
