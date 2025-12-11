@@ -1,12 +1,33 @@
 package org.example.project
-
-import cafe.adriel.voyager.core.screen.Screen
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import cafe.adriel.voyager.core.screen.Screen
+import ecooil_kmp.composeapp.generated.resources.Res
+import ecooil_kmp.composeapp.generated.resources.ecooil_text
+import org.jetbrains.compose.resources.painterResource
 
 object QrScreen : Screen {
     @Composable
     override fun Content() {
-        Text("Second Empty Screen")
+        Box(
+            modifier = Modifier
+                .fillMaxSize(), // экран полностью
+            contentAlignment = Alignment.Center // по центру
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.ecooil_text),
+                contentDescription = "QR Code",
+                modifier = Modifier
+                    .fillMaxWidth(0.8f) // занимает 80% ширины экрана
+                    .aspectRatio(1f), // квадратное изображение
+
+            contentScale = ContentScale.Fit // масштабируется под экран
+            )
+        }
     }
 }

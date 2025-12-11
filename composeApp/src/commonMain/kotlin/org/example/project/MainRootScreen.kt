@@ -2,14 +2,17 @@ package org.example.project
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.*
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.home
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 object MainRootScreen : Screen {
 
@@ -23,22 +26,25 @@ object MainRootScreen : Screen {
                         NavigationBarItem(
                             selected = tabNavigator.current == HomeTab,
                             onClick = { tabNavigator.current = HomeTab },
-                            icon = { Icon(HomeTab.options.icon!!, null) },
-                            label = { Text(HomeTab.options.title) }
+                            icon = { Icon(HomeTab.options.icon!!, null,
+                                modifier = Modifier.size(24.dp)) },
+                            label = { Text("Главная") }
                         )
 
                         NavigationBarItem(
                             selected = tabNavigator.current == EmptyTab,
                             onClick = { tabNavigator.current = EmptyTab },
-                            icon = { Icon(EmptyTab.options.icon!!, null) },
-                            label = { Text(EmptyTab.options.title) }
+                            icon = { Icon(EmptyTab.options.icon!!, null,
+                                modifier = Modifier.size(24.dp)) },
+                            label = { Text("QR") }
                         )
 
                         NavigationBarItem(
                             selected = tabNavigator.current == SGTab,
                             onClick = { tabNavigator.current = SGTab },
-                            icon = { Icon(SGTab.options.icon!!, null) },
-                            label = { Text(SGTab.options.title) }
+                            icon = { Icon(SGTab.options.icon!!, null,
+                                modifier = Modifier.size(24.dp)) },
+                            label = { Text("АЗС") }
                         )
                     }
                 }
@@ -62,7 +68,7 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
-        HomeScreen.Content()
+        SGScreenMain()
     }
 }
 

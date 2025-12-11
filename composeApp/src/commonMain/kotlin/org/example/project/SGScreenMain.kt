@@ -30,7 +30,18 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun SGScreenMain() {
 
     val scroll = rememberScrollState()
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF00A8A8))
+            .imePadding()
+    )
+//    Image(
+//        painter = painterResource(Res.drawable.bg_image),
+//        contentDescription = null,
+//        contentScale = ContentScale.Crop,
+//        modifier = Modifier.matchParentSize()
+//    )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,6 +66,7 @@ fun SGScreenMain() {
                     painter = painterResource(Res.drawable.ecooil_text),
                     contentDescription = "EcoOil",
                     modifier = Modifier.height(60.dp)
+                        .padding(16.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -70,16 +82,16 @@ fun SGScreenMain() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "SG Lite",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black.copy(alpha = 0.7f)
-                )
+//                Text(
+//                    text = "SG Lite",
+//                    fontSize = 18.sp,
+//                    fontWeight = FontWeight.Medium,
+//                    color = Color.Black.copy(alpha = 0.7f)
+//                )
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(2.dp))
 
         // ---- АКЦИИ ----
         Text("Акции", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
@@ -97,7 +109,7 @@ fun SGScreenMain() {
                     Image(
                         painter = painterResource(Res.drawable.ecooil_text),
                         contentDescription = null,
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
                     )
                 }
             }
@@ -160,49 +172,80 @@ fun SGScreenMain() {
 
         Spacer(Modifier.height(12.dp))
 
-        repeat(4) {
-            Card(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(Color.White),
+            elevation = CardDefaults.cardElevation(8.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                repeat(4) {
+                    Card(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        
+                        elevation = CardDefaults.cardElevation(4.dp)
+                    ) {
 
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-
-                        Card(
-                            shape = RoundedCornerShape(50),
-                            colors = CardDefaults.cardColors(Color(0xFFE3F2FD))
                         ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.sms),
-                                contentDescription = null,
-                                tint = Color(0xFF1E88E5),
-                                modifier = Modifier.height(24.dp)
-                            )
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                Card(
+                                    shape = RoundedCornerShape(50),
+                                    colors = CardDefaults.cardColors(Color(0xFFE3F2FD))
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.sms),
+                                        contentDescription = null,
+                                        tint = Color(0xFF1E88E5),
+                                        modifier = Modifier
+                                            .size(24.dp)
+                                            .padding(4.dp)
+                                    )
+                                }
+
+                                Spacer(Modifier.width(16.dp))
+
+                                Column {
+                                    Text(
+                                        "Зачислено",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        "АИ-92 33,02л",
+                                        fontSize = 13.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    "+9,91 смн",
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF2E7D32)
+                                )
+                                Text(
+                                    "18.03.2025 16:02:14",
+                                    fontSize = 13.sp,
+                                    color = Color.Gray
+                                )
+                            }
                         }
-
-                        Spacer(Modifier.width(16.dp))
-
-                        Column {
-                            Text("Зачислено ", fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                            Text("АИ-92 33,02л ", fontSize = 13.sp, color = Color.Gray)
-                        }
-                    }
-
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("+9,91 смн", fontSize = 16.sp, color = Color(0xFF2E7D32))
-                        Text("18.03.2025 16:02:14", fontSize = 13.sp, color = Color.Gray)
                     }
                 }
             }
         }
+
     }
 }
