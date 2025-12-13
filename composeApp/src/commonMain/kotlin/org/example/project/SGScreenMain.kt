@@ -19,7 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ecooil_kmp.composeapp.generated.resources.Res
+import ecooil_kmp.composeapp.generated.resources.bg_ecooil
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
+import ecooil_kmp.composeapp.generated.resources.ic_ai92
+import ecooil_kmp.composeapp.generated.resources.ic_dt
+import ecooil_kmp.composeapp.generated.resources.ic_gas
+import ecooil_kmp.composeapp.generated.resources.icon_dt
+import ecooil_kmp.composeapp.generated.resources.icon_gas
+import ecooil_kmp.composeapp.generated.resources.logo_eco
 import ecooil_kmp.composeapp.generated.resources.right_arrow
 import ecooil_kmp.composeapp.generated.resources.sms
 import org.jetbrains.compose.resources.painterResource
@@ -28,25 +35,15 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun SGScreenMain() {
-
+    GradientBackground(showVersion = false) {
+    }
     val scroll = rememberScrollState()
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF00A8A8))
-            .imePadding()
-    )
-//    Image(
-//        painter = painterResource(Res.drawable.bg_image),
-//        contentDescription = null,
-//        contentScale = ContentScale.Crop,
-//        modifier = Modifier.matchParentSize()
-//    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scroll)
-            .padding(16.dp)
+        //    .padding(16.dp)
     ) {
 
         // ---- TOP CARD ----
@@ -94,11 +91,14 @@ fun SGScreenMain() {
         Spacer(Modifier.height(2.dp))
 
         // ---- АКЦИИ ----
-        Text("Акции", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+        Text("Акции", fontSize = 22.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(16.dp,0.dp))
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(vertical = 12.dp)
+            contentPadding = PaddingValues(start = 16.dp),
+            modifier = Modifier.padding(vertical = 12.dp),
+
         ) {
             items(5) {
                 Card(
@@ -107,7 +107,7 @@ fun SGScreenMain() {
                     elevation = CardDefaults.cardElevation(6.dp)
                 ) {
                     Image(
-                        painter = painterResource(Res.drawable.ecooil_text),
+                        painter = painterResource(Res.drawable.icon_dt),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                     )
@@ -118,7 +118,8 @@ fun SGScreenMain() {
         Spacer(Modifier.height(16.dp))
 
         // ---- ТОПЛИВО ----
-        Text("Деньги на топливо", fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+        Text("Деньги на топливо", fontSize = 22.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(16.dp,0.dp))
 
         val fuelItems = listOf(
             "АИ-95" to "0.00cмн",
@@ -130,20 +131,30 @@ fun SGScreenMain() {
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(start = 16.dp),
             modifier = Modifier.padding(top = 12.dp)
         ) {
             items(fuelItems) { item ->
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
 
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.size(90.dp)
                     ) {
-                        Image(
-                            painter = painterResource(Res.drawable.sms),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Image(
+                                painter = painterResource(Res.drawable.ic_gas),
+                                contentDescription = null,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.size(75.dp)
+                            )
+                        }
+
                     }
 
                     Spacer(Modifier.height(8.dp))
@@ -162,11 +173,13 @@ fun SGScreenMain() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("История", fontSize = 22.sp)
+            Text("История", fontSize = 22.sp,
+                modifier = Modifier.padding(16.dp,0.dp))
             Icon(
                 painter = painterResource(Res.drawable.right_arrow),
                 contentDescription = null,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.height(35.dp)
+                    .padding(end = 16.dp, top = 5.dp, bottom = 5.dp, start = 0.dp)
             )
         }
 
@@ -174,7 +187,8 @@ fun SGScreenMain() {
 
         Card(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(16.dp,0.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(Color.White),
             elevation = CardDefaults.cardElevation(8.dp)
@@ -185,7 +199,7 @@ fun SGScreenMain() {
                         Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp),
-                        
+
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
 
@@ -204,12 +218,12 @@ fun SGScreenMain() {
                                     colors = CardDefaults.cardColors(Color(0xFFE3F2FD))
                                 ) {
                                     Icon(
-                                        painter = painterResource(Res.drawable.sms),
+                                        painter = painterResource(Res.drawable.ic_ai92),
                                         contentDescription = null,
                                         tint = Color(0xFF1E88E5),
                                         modifier = Modifier
-                                            .size(24.dp)
-                                            .padding(4.dp)
+                                            .size(40.dp)
+                                            .padding(2.dp)
                                     )
                                 }
 

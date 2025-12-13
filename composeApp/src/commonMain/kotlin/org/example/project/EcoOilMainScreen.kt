@@ -45,222 +45,257 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun EcoOilMainScreen() {
-    val scrollState = rememberScrollState()
+    GradientBackground(showVersion = true) {
 
-    MaterialTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF00A8A8))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(bottom = 80.dp) // место под bottom bar
-            ) {
-                // === Верхняя карточка с балансом ===
-                Card(
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(12.dp),
+        val scrollState = rememberScrollState()
+
+        MaterialTheme {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 32.dp)
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(bottom = 80.dp) // место под bottom bar
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(vertical = 24.dp)
+                    // === Верхняя карточка с балансом ===
+                    Card(
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 32.dp)
                     ) {
-                        Image(
-                            painter = painterResource(Res.drawable.ecooil_text),
-                            contentDescription = "EcoOil",
-                            modifier = Modifier.height(60.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(vertical = 24.dp)
                         ) {
-                            BalanceItem(label = "БОНУС", amount = "10.3 C", amountColor = Color(0xFFFF6B00))
-                            Spacer(modifier = Modifier.width(1.dp).height(40.dp).background(Color(0xFFE0E0E0)))
-                            BalanceItem(label = "БАЛАНС", amount = "20.0 C", amountColor = Color(0xFF00A8A8))
+                            Image(
+                                painter = painterResource(Res.drawable.ecooil_text),
+                                contentDescription = "EcoOil",
+                                modifier = Modifier.height(60.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                BalanceItem(
+                                    label = "БОНУС",
+                                    amount = "10.3 C",
+                                    amountColor = Color(0xFFFF6B00)
+                                )
+                                Spacer(
+                                    modifier = Modifier.width(1.dp).height(40.dp)
+                                        .background(Color(0xFFE0E0E0))
+                                )
+                                BalanceItem(
+                                    label = "БАЛАНС",
+                                    amount = "20.0 C",
+                                    amountColor = Color(0xFF00A8A8)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "SG Lite",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.Black.copy(alpha = 0.7f)
+                            )
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "SG Lite",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Black.copy(alpha = 0.7f)
-                        )
                     }
-                }
 
-                // === Акции ===
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                        .clickable { /* открыть акции */ },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Акции", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                    Icon(
-                        painterResource(Res.drawable.right_arrow),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.width(24.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // === Цены на топливо ===
-                Text(
-                    "Цены на топливо",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 32.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(horizontal = 32.dp)
-                ) {
-                    items(fuelList) { fuel ->
-                        FuelPriceCard(fuel = fuel)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                // === История ===
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 32.dp)
-                        .clickable { /* открыть историю */ },
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("История", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                    Icon(painterResource(Res.drawable.right_arrow), contentDescription = null, tint = Color.White)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .height(180.dp)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
+                    // === Акции ===
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp)
+                            .clickable { /* открыть акции */ },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Text(
+                            "Акции",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
                         Icon(
                             painterResource(Res.drawable.right_arrow),
                             contentDescription = null,
-                            tint = Color(0xFF00A8A8).copy(alpha = 0.6f),
-                            modifier = Modifier.size(48.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            "Нет истории транзакций",
-                            fontSize = 16.sp,
-                            color = Color.Gray
+                            tint = Color.White,
+                            modifier = Modifier.width(24.dp)
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // === Цены на топливо ===
+                    Text(
+                        "Цены на топливо",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(horizontal = 32.dp)
+                    ) {
+                        items(fuelList) { fuel ->
+                            FuelPriceCard(fuel = fuel)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(40.dp))
+
+                    // === История ===
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 32.dp)
+                            .clickable { /* открыть историю */ },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "История",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
+                        Icon(
+                            painterResource(Res.drawable.right_arrow),
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Card(
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .height(180.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.right_arrow),
+                                contentDescription = null,
+                                tint = Color(0xFF00A8A8).copy(alpha = 0.6f),
+                                modifier = Modifier.size(48.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                "Нет истории транзакций",
+                                fontSize = 16.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(100.dp))
                 }
 
-                Spacer(modifier = Modifier.height(100.dp))
             }
-
         }
     }
-}
 
-@Composable
-fun BalanceItem(label: String, amount: String, amountColor: Color) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = label, fontSize = 14.sp, color = Color.Gray)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = amount, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = amountColor)
+    @Composable
+    fun BalanceItem(label: String, amount: String, amountColor: Color) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = label, fontSize = 14.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = amount, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = amountColor)
+        }
     }
-}
 
-data class Fuel(
-    val name: String,
-    val shortName: String,
-    val price: String,
-    val iconRes: DrawableResource,
-    val bgColor: Color
-)
+    data class Fuel(
+        val name: String,
+        val shortName: String,
+        val price: String,
+        val iconRes: DrawableResource,
+        val bgColor: Color
+    )
 
-val fuelList = listOf(
-    Fuel("АИ-95", "95", "0.00 смн", Res.drawable.home, Color(0xFFFFF3E0)),
-    Fuel("АИ-92", "92", "0.00 смн", Res.drawable.home, Color(0xFFE0F7FA)),
-    Fuel("ДТ", "ДТ", "0.00 смн", Res.drawable.home, Color(0xFF212121)),
-    Fuel("ДТ-ЭКТО", "ЭКТО", "0.00 смн", Res.drawable.home, Color(0xFFF5F5F5)),
-    Fuel("ГАЗ", "ГАЗ", "0.00 смн", Res.drawable.home, Color(0xFF424242)),
-)
+    val fuelList = listOf(
+        Fuel("АИ-95", "95", "0.00 смн", Res.drawable.home, Color(0xFFFFF3E0)),
+        Fuel("АИ-92", "92", "0.00 смн", Res.drawable.home, Color(0xFFE0F7FA)),
+        Fuel("ДТ", "ДТ", "0.00 смн", Res.drawable.home, Color(0xFF212121)),
+        Fuel("ДТ-ЭКТО", "ЭКТО", "0.00 смн", Res.drawable.home, Color(0xFFF5F5F5)),
+        Fuel("ГАЗ", "ГАЗ", "0.00 смн", Res.drawable.home, Color(0xFF424242)),
+    )
 
-@Composable
-fun FuelPriceCard(fuel: Fuel) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = fuel.bgColor),
-        elevation = CardDefaults.cardElevation(6.dp),
-        modifier = Modifier.size(width = 100.dp, height = 120.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
+    @Composable
+    fun FuelPriceCard(fuel: Fuel) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = fuel.bgColor),
+            elevation = CardDefaults.cardElevation(6.dp),
+            modifier = Modifier.size(width = 100.dp, height = 120.dp)
         ) {
-            Image(
-                painter = painterResource(fuel.iconRes),
-                contentDescription = null,
-                modifier = Modifier.size(30.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(fuel.shortName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            Text(fuel.price, fontSize = 12.sp, color = Color.Gray)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Image(
+                    painter = painterResource(fuel.iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(fuel.shortName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(fuel.price, fontSize = 12.sp, color = Color.Gray)
+            }
         }
     }
-}
 
-@Composable
-fun BottomNavigationBar(modifier: Modifier = Modifier) {
-    Card(
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF00D4D4)),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(80.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
+    @Composable
+    fun BottomNavigationBar(modifier: Modifier = Modifier) {
+        Card(
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF00D4D4)),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(80.dp)
         ) {
-            BottomNavItem(icon = painterResource(Res.drawable.home), label = "Главная", selected = true)
-            BottomNavItem(icon =painterResource(Res.drawable.map), label = "QR", selected = false)
-            BottomNavItem(icon = painterResource(Res.drawable.map), label = "АЗС", selected = false)
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BottomNavItem(
+                    icon = painterResource(Res.drawable.home),
+                    label = "Главная",
+                    selected = true
+                )
+                BottomNavItem(
+                    icon = painterResource(Res.drawable.map),
+                    label = "QR",
+                    selected = false
+                )
+                BottomNavItem(
+                    icon = painterResource(Res.drawable.map),
+                    label = "АЗС",
+                    selected = false
+                )
+            }
         }
     }
-}
+
 
 @Composable
 fun BottomNavItem(icon: Painter, label: String, selected: Boolean) {
@@ -270,4 +305,5 @@ fun BottomNavItem(icon: Painter, label: String, selected: Boolean) {
         Spacer(modifier = Modifier.height(4.dp))
         Text(label, color = tint, fontSize = 12.sp)
     }
+
 }

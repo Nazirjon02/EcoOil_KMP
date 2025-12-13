@@ -73,11 +73,13 @@ fun AppContent(client: InsultCensorClient?) {
         focusRequester.requestFocus()
     }
 
+    GradientBackground(showVersion = false) {
+    }
+
     MaterialTheme {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF00A8A8))
                 .imePadding()
         ) {
             Column(
