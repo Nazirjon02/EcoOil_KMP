@@ -27,6 +27,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
@@ -58,6 +61,15 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun AppContent(client: InsultCensorClient?) {
     val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow
+    val snackbarHostState = remember { SnackbarHostState() }
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            snackbarMessage = null
+        }
+    }
+
 
     val scope = rememberCoroutineScope()
 
@@ -77,6 +89,9 @@ fun AppContent(client: InsultCensorClient?) {
     }
 
     MaterialTheme {
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ){
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -90,7 +105,6 @@ fun AppContent(client: InsultCensorClient?) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(80.dp))
-
                 Card(
                     shape = RoundedCornerShape(24.dp),
                     elevation = CardDefaults.cardElevation(12.dp),
@@ -256,7 +270,7 @@ fun AppContent(client: InsultCensorClient?) {
                                             isLoading = false
                                             return@launch
                                         }
-                                        val hash = Until.sha256(phone +  Until.getDeviceId())
+                                        val hash = Until.sha256(phone + Until.getDeviceId())
                                         val map = hashMapOf(
                                             "PhoneNumber" to phone,
                                             "DeviceId" to Until.getDeviceId(),
@@ -265,11 +279,11 @@ fun AppContent(client: InsultCensorClient?) {
 
                                         val result = client?.request<PhoneResponse>(
                                             path = Constant.chackPhoneNumber,
-                                            params = map ,
+                                            params = map,
                                         )
 
-                                        result?.onSuccess { body->
-                                            if (body.code==1) {
+                                        result?.onSuccess { body ->
+                                            if (body.code == 1) {
                                                 isLoading = false
                                                 savedPhoneNumber = phone
                                                 phone = ""
@@ -282,14 +296,14 @@ fun AppContent(client: InsultCensorClient?) {
                                                         timer--
                                                     }
                                                 }
-                                            }else{
+                                            } else {
                                                 ToastManager.show(body.message)
                                                 isLoading = false
                                             }
-                                            }?.onError {
+                                        }?.onError {
                                             // обработка ошибки
-                                                isLoading = false
-                                            } ?: run {
+                                            isLoading = false
+                                        } ?: run {
                                             // если client == null — просто переключаемся (для preview)
                                             isLoading = false
                                             savedPhoneNumber = phone
@@ -315,7 +329,8 @@ fun AppContent(client: InsultCensorClient?) {
                                             return@launch
                                         }
 
-                                        val hash = Until.sha256(savedPhoneNumber +  Until.getDeviceId()+phone)
+                                        val hash =
+                                            Until.sha256(savedPhoneNumber + Until.getDeviceId() + phone)
                                         val map = hashMapOf(
                                             "PhoneNumber" to phone,
                                             "DeviceId" to Until.getDeviceId(),
@@ -325,15 +340,16 @@ fun AppContent(client: InsultCensorClient?) {
 
                                         val result = client?.request<PhoneResponse>(
                                             path = Constant.checkSMS,
-                                            params = map ,
+                                            params = map,
                                         )
 
-                                        result?.onSuccess { body->
-                                            if (body.code==1) {
+                                        result?.onSuccess { body ->
+                                            if (body.code == 1) {
                                                 navigator.replace(MainRootScreen)
-                                            }else{
+                                            } else {
                                                 navigator.replace(MainRootScreen)
-                                                ToastManager.show(body.message)
+                                                snackbarMessage = body.message   // 🔥 ВОТ ОН
+                                           //     ToastManager.show(body.message)
                                                 isLoading = false
                                             }
                                         }?.onError {
@@ -385,5 +401,6 @@ fun AppContent(client: InsultCensorClient?) {
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }
+    }
     }
 }

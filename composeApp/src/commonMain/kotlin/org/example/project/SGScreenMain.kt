@@ -2,10 +2,12 @@ package org.example.project
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 
@@ -13,6 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -27,8 +31,10 @@ import ecooil_kmp.composeapp.generated.resources.ic_gas
 import ecooil_kmp.composeapp.generated.resources.icon_dt
 import ecooil_kmp.composeapp.generated.resources.icon_gas
 import ecooil_kmp.composeapp.generated.resources.logo_eco
+import ecooil_kmp.composeapp.generated.resources.notification
 import ecooil_kmp.composeapp.generated.resources.right_arrow
 import ecooil_kmp.composeapp.generated.resources.sms
+import ecooil_kmp.composeapp.generated.resources.user
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -36,6 +42,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun SGScreenMain() {
     GradientBackground(showVersion = false) {
+
     }
     val scroll = rememberScrollState()
 
@@ -45,6 +52,15 @@ fun SGScreenMain() {
             .verticalScroll(scroll)
         //    .padding(16.dp)
     ) {
+        HomeTopBar(
+            userName = "Test",
+            onProfileClick = {
+
+            /* открыть профиль */
+            },
+            onNotificationClick = { /* открыть уведомления */ }
+        )
+
 
         // ---- TOP CARD ----
         Card(
@@ -53,7 +69,7 @@ fun SGScreenMain() {
             elevation = CardDefaults.cardElevation(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .padding(start = 24.dp, end = 24.dp, top = 5.dp, bottom = 32.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -79,12 +95,12 @@ fun SGScreenMain() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-//                Text(
-//                    text = "SG Lite",
-//                    fontSize = 18.sp,
-//                    fontWeight = FontWeight.Medium,
-//                    color = Color.Black.copy(alpha = 0.7f)
-//                )
+                Text(
+                    text = "Status / SG Lite",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
             }
         }
 
@@ -261,5 +277,74 @@ fun SGScreenMain() {
             }
         }
 
+    }
+}
+
+@Composable
+fun HomeTopBar(
+    userName: String = "Test",
+    onProfileClick: () -> Unit = {},
+    onNotificationClick: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // 👤 Аватар
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(Color(0x99FFFFFF))
+                    .clickable { onProfileClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.user),
+                            contentDescription = null,
+                            tint = Color(0xFF1E88E5),
+                            modifier = Modifier
+                                .size(38.dp)
+                                .padding(7.dp)
+                        )
+                    }
+
+
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // 👤 Имя
+            Text(
+                text = userName,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // 🔔 Уведомления
+            IconButton(onClick = onNotificationClick) {
+                Icon(
+                    painter = painterResource(Res.drawable.notification),
+                    contentDescription = "Notifications",
+                    tint = Color.White
+                )
+            }
+        }
     }
 }
