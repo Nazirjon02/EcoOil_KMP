@@ -1,6 +1,7 @@
 package org.example.data
 
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.DrawableResource
 
 @Serializable
 data class CarResponse(
@@ -39,4 +40,9 @@ data class CarOil(
     val dt: String,
     val gas: String,
     val dtecto: String
+)
+data class FuelItem(
+    val title: String,
+    val value: String,
+    val icon: DrawableResource
 )

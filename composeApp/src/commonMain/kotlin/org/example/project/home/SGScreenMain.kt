@@ -13,49 +13,86 @@ import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ecooil_kmp.composeapp.generated.resources.Res
-import ecooil_kmp.composeapp.generated.resources.bg_ecooil
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
 import ecooil_kmp.composeapp.generated.resources.ic_ai92
+import ecooil_kmp.composeapp.generated.resources.ic_ai95
 import ecooil_kmp.composeapp.generated.resources.ic_dt
+import ecooil_kmp.composeapp.generated.resources.ic_dtecto
 import ecooil_kmp.composeapp.generated.resources.ic_gas
 import ecooil_kmp.composeapp.generated.resources.icon_dt
-import ecooil_kmp.composeapp.generated.resources.icon_gas
-import ecooil_kmp.composeapp.generated.resources.logo_eco
 import ecooil_kmp.composeapp.generated.resources.notification
 import ecooil_kmp.composeapp.generated.resources.right_arrow
-import ecooil_kmp.composeapp.generated.resources.sms
 import ecooil_kmp.composeapp.generated.resources.user
-import kotlinx.coroutines.launch
 import org.example.data.CarResponse
+import org.example.data.FuelItem
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
-import org.example.networking.PhoneResponse
 import org.example.util.AppSettings
 import org.example.util.onError
 import org.example.util.onSuccess
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
 @Composable
 @Preview
 fun SGScreenMain(client: InsultCensorClient?) {
-    val scope = rememberCoroutineScope()
-      scope.launch {
-          requestCarData(client)
-      }
+    val scroll = rememberScrollState()
+    // 🔹 State для данных экрана
+    var userName by remember { mutableStateOf("Test") }
+    var bonusText by remember { mutableStateOf("0.00 C") }
+    var balanceText by remember { mutableStateOf("0.00 C") }
+    var statusText by remember { mutableStateOf("Status / SG Lite") }
+    var fuelItems2 by remember {
+        mutableStateOf(
+            listOf<FuelItem>()
+        )
+    }
+
+    // 🔹 Загрузка данных (НЕ composable!)
+    suspend fun loadData() {
+        requestCarData(
+            client = client,
+            onSuccess = { body ->
+                userName = body.data?.car_data?.car_name ?: userName
+                bonusText = "${body.data?.car_data?.car_pip_size ?: 0} C"
+                balanceText = "${body.data?.car_data?.car_balance_size ?: 0} C"
+                statusText = body.data?.car_data?.pip_status_type.toString()
+                val oil = body.data?.car_oil
+
+                if (oil != null) {
+                    fuelItems2 = listOf(
+                        FuelItem("АИ-95", "${oil.ai95} cмн", Res.drawable.ic_ai95),
+                        FuelItem("АИ-92", "${oil.ai92} cмн", Res.drawable.ic_ai92),
+                        FuelItem("ДТ", "${oil.dt} cмн", Res.drawable.ic_dt),
+                        FuelItem("ДТ-Экто", "${oil.dtecto} cмн", Res.drawable.ic_dtecto),
+                        FuelItem("ГАЗ", "${oil.gas} cмн", Res.drawable.ic_gas)
+                    )
+                }
+            },
+            onError = {
+                // при необходимости: лог / toast
+            }
+        )
+    }
+
+    // ✅ ВЫЗЫВАЕТСЯ 1 РАЗ при открытии экрана
+    LaunchedEffect(Unit) {
+        loadData()
+    }
     _root_ide_package_.org.example.project.GradientBackground(showVersion = false) {
-        val scroll = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,7 +100,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
             //    .padding(16.dp)
         ) {
             HomeTopBar(
-                userName = "Test",
+                userName = userName,
                 onProfileClick = {
 
                     /* открыть профиль */
@@ -99,7 +136,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                     ) {
                         _root_ide_package_.org.example.project.BalanceItem(
                             label = "БОНУС",
-                            amount = "10.3 C",
+                            amount = bonusText,
                             amountColor = Color(0xFFFF6B00)
                         )
                         Spacer(
@@ -108,7 +145,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                         )
                         _root_ide_package_.org.example.project.BalanceItem(
                             label = "БАЛАНС",
-                            amount = "20.0 C",
+                            amount = balanceText,
                             amountColor = Color(0xFF00A8A8)
                         )
                     }
@@ -116,7 +153,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Status / SG Lite",
+                        text = "Status / $statusText",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black.copy(alpha = 0.7f)
@@ -161,20 +198,12 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 modifier = Modifier.padding(16.dp, 0.dp)
             )
 
-            val fuelItems = listOf(
-                "АИ-95" to "0.00cмн",
-                "АИ-92" to "0.00cмн",
-                "ДТ" to "0.00cмн",
-                "ДТ-Экто" to "0.00cмн",
-                "ГАЗ" to "0.00cмн"
-            )
-
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(start = 16.dp),
                 modifier = Modifier.padding(top = 12.dp)
             ) {
-                items(fuelItems) { item ->
+                items(fuelItems2) { item ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
@@ -189,7 +218,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                                 modifier = Modifier.fillMaxSize()
                             ) {
                                 Image(
-                                    painter = painterResource(Res.drawable.ic_gas),
+                                    painter = painterResource(item.icon),
                                     contentDescription = null,
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier.size(75.dp)
@@ -200,8 +229,8 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
                         Spacer(Modifier.height(8.dp))
 
-                        Text(item.first, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                        Text(item.second, fontSize = 12.sp, color = Color.Gray)
+                        Text(item.title, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text(item.value, fontSize = 12.sp, color = Color.Gray)
                     }
                 }
             }
@@ -376,33 +405,42 @@ fun HomeTopBar(
         }
     }
 }
+suspend fun requestCarData(
+    client: InsultCensorClient?,
+    onSuccess: (CarResponse) -> Unit,
+    onError: (Throwable?) -> Unit
+) {
+    try {
+        val hash = _root_ide_package_.org.example.project.Until.sha256(
+            AppSettings.getString("token") +
+                    AppSettings.getInt("car_id") +
+                    _root_ide_package_.org.example.project.Until.getDeviceId()
+        )
 
-suspend fun requestCarData(client: InsultCensorClient?){
-    val hash = _root_ide_package_.org.example.project.Until.sha256( AppSettings.getString("token") + AppSettings.getInt("car_id") + _root_ide_package_.org.example.project.Until.getDeviceId())
-    val map = hashMapOf(
-        "Token" to AppSettings.getString("token"),
-        "DeviceId" to _root_ide_package_.org.example.project.Until.getDeviceId(),
-        "CarId" to AppSettings.getInt("car_id").toString(),
-        "Limit" to 0,
-        "Hash" to hash
-    )
+        val map = hashMapOf(
+            "Token" to AppSettings.getString("token"),
+            "DeviceId" to _root_ide_package_.org.example.project.Until.getDeviceId(),
+            "CarId" to AppSettings.getInt("car_id").toString(),
+            "Limit" to 0,
+            "Hash" to hash
+        )
 
-    val result = client?.request<CarResponse>(
-        path = Constant.getCar,
-        params = map,
-    )
+        val result = client?.request<CarResponse>(
+            path = Constant.getCar,
+            params = map,
+        )
 
-    result?.onSuccess { body ->
-        if (body.code == 1) {
-          //  body.data?.car_id?.let { AppSettings.putInt("car_id",it) }
-        } else {
-            //     ToastManager.show(body.message)
+        result?.onSuccess { body ->
+            if (body.code == 1) {
+                onSuccess(body)
+            } else {
+                onError(null)
+            }
+        }?.onError { e ->
+        } ?: run {
+            onError(null)
         }
-    }?.onError {
-      //  isLoading = false
-    } ?: run {
-      //  isLoading = false
+    } catch (e: Throwable) {
+        onError(e)
     }
 }
-
-
