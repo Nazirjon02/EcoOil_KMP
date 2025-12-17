@@ -1,34 +1,48 @@
-package org.example.project
-
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.call
 import ecooil_kmp.composeapp.generated.resources.communication
-import ecooil_kmp.composeapp.generated.resources.home
 import ecooil_kmp.composeapp.generated.resources.home_info
-import ecooil_kmp.composeapp.generated.resources.ic_ai92
-import ecooil_kmp.composeapp.generated.resources.icon_dt
+import org.example.project.AuthScreen
+import org.example.util.AppSettings
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+// ------------------------- InfoScreen -------------------------
+object InfoScreen : Screen {
+    @Composable
+    override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
+
+        InfoScreenContent(
+            onExit = {
+                AppSettings.clear()           // Очистка токена
+                navigator.replace(AuthScreen) // Переход на AuthScreen
+            }
+        )
+    }
+}
+
+// ------------------------- InfoScreenContent -------------------------
 @Composable
-@Preview
-fun InfoScreenContent() {
+@Preview(showBackground = true)
+fun InfoScreenContent(onExit: () -> Unit = {}) {
     val scrollState = rememberScrollState()
 
     Column(
@@ -51,7 +65,6 @@ fun InfoScreenContent() {
                     .padding(vertical = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Простая круглая аватарка вместо иконки
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -134,26 +147,24 @@ fun InfoScreenContent() {
             Column(modifier = Modifier.padding(20.dp)) {
                 ContactRow(
                     text = "Тоҷикистон, г. Душанбе, ул. Баховуддин 15",
-                    Res.drawable.home_info
+                    icon = Res.drawable.home_info
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 ContactRow(
                     text = "4800",
-                    Res.drawable.call
+                    icon = Res.drawable.call
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 ContactRow(
                     text = "info@ecooil.tj",
-                    Res.drawable.communication
+                    icon = Res.drawable.communication
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(40.dp))
         Button(
-            onClick = {
-
-            },
+            onClick = onExit, // Переход через callback
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -162,28 +173,24 @@ fun InfoScreenContent() {
                 containerColor = Color(0xFF1E88E5),
                 disabledContainerColor = Color(0xFFAAD7D7)
             )
-        )
-         {
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(24.dp),
                 contentAlignment = Alignment.Center
             ) {
-
                 Text(
                     text = "Exit",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
-
             }
         }
     }
 }
 
-// ──────── Универсальные компоненты ────────
-
+// ------------------------- Универсальные компоненты -------------------------
 @Composable
 private fun InfoRow(label: String, value: String) {
     Row(
@@ -196,7 +203,7 @@ private fun InfoRow(label: String, value: String) {
 }
 
 @Composable
-private fun ContactRow(text: String,icon: DrawableResource) {
+private fun ContactRow(text: String, icon: DrawableResource) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -217,26 +224,15 @@ private fun ContactRow(text: String,icon: DrawableResource) {
                         .padding(7.dp)
                 )
             }
-
         }
 
-            Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = text,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
+        Text(
+            text = text,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
-}
-
-
-object InfoScreen : Screen {
-    @Composable
-    override fun Content() {
-        InfoScreenContent()
-    }
-
 }

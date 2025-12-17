@@ -52,13 +52,13 @@ import kotlinx.coroutines.launch
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.PhoneResponse
+import org.example.util.AppSettings
 import org.example.util.onError
 import org.example.util.onSuccess
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-@Preview
 fun AppContent(client: InsultCensorClient?) {
     val navigator = cafe.adriel.voyager.navigator.LocalNavigator.currentOrThrow
     val snackbarHostState = remember { SnackbarHostState() }
@@ -70,7 +70,6 @@ fun AppContent(client: InsultCensorClient?) {
         }
     }
 
-
     val scope = rememberCoroutineScope()
 
     // Состояния
@@ -81,326 +80,326 @@ fun AppContent(client: InsultCensorClient?) {
     var timer by remember { mutableStateOf(60) }
     val focusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-
     GradientBackground(showVersion = false) {
-    }
-
-    MaterialTheme {
-        Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) }
-        ){
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(80.dp))
-                Card(
-                    shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+        MaterialTheme {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding()
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 20.dp, top = 5.dp, end = 20.dp, bottom = 20.dp),
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Image(
-                            painter = painterResource(Res.drawable.ecooil_text),
-                            contentDescription = "Логотип EcoOil",
-                            modifier = Modifier
-                                .height(120.dp)
-                                .padding(bottom = 10.dp)
-                        )
-
-                        Text(
-                            text = if (!isSmsStep) "Авторизация" else "Пожалуйста, введите код, отправленный на ваш",
-                            fontSize = if (!isSmsStep) 24.sp else 18.sp,
-                            textAlign = TextAlign.Center,
-                            fontWeight = if (!isSmsStep) FontWeight.Bold else FontWeight.Medium,
-                            color = if (!isSmsStep) Color(0xFF00A8A8) else Color.Black,
-                            modifier = Modifier.padding(bottom = 32.dp)
-
-                        )
-
-                        Text(
-                            text = if (!isSmsStep)
-                                "Пожалуйста, введите свой номер телефона"
-                            else
-                                "Номер мобильного телефона +992 $savedPhoneNumber",
-                            fontSize = 14.sp,
-                            color = Color(0xFF00A8A8),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(bottom = 10.dp)
-                        )
-
-                        // Поле ввода (номер или код)
-                        OutlinedTextField(
-                            value = phone,
-                            onValueChange = { newText ->
-                                val filtered = newText.filter { it.isDigit() }
-                                if (!isSmsStep) {
-                                    // номер — до 9 цифр
-                                    if (filtered.length <= 9) phone = filtered
-                                } else {
-                                    // код — до 4 цифр
-                                    if (filtered.length <= 4) phone = filtered
-                                }
-                            },
-                            label = {
-                                Text(
-                                    if (!isSmsStep)
-                                        "Номер телефона"
-                                    else
-                                        "Введите SMS код "
+                        Spacer(modifier = Modifier.height(80.dp))
+                        Card(
+                            shape = RoundedCornerShape(24.dp),
+                            elevation = CardDefaults.cardElevation(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        top = 5.dp,
+                                        end = 20.dp,
+                                        bottom = 20.dp
+                                    ),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ecooil_text),
+                                    contentDescription = "Логотип EcoOil",
+                                    modifier = Modifier
+                                        .height(120.dp)
+                                        .padding(bottom = 10.dp)
                                 )
 
-                            },
-                            placeholder = {
-                                if (isSmsStep) {
-                                    Text("XXXX", color = Color.Gray)
-                                }
-                            },
-                            leadingIcon = {
-                                if (!isSmsStep) {
-                                    Text(
-                                        "+992",
-                                        color = Color(0xFF00A8A8),
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                } else {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.sms),
-                                        contentDescription = "SMS",
-                                        tint = Color(0xFF00A8A8),
-                                        modifier = Modifier
-                                            .height(24.dp)
-                                            .width(24.dp)
+                                Text(
+                                    text = if (!isSmsStep) "Авторизация" else "Пожалуйста, введите код, отправленный на ваш",
+                                    fontSize = if (!isSmsStep) 24.sp else 18.sp,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = if (!isSmsStep) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (!isSmsStep) Color(0xFF00A8A8) else Color.Black,
+                                    modifier = Modifier.padding(bottom = 32.dp)
 
-                                    )
-                                }
-                            },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = if (!isSmsStep) KeyboardType.Phone else KeyboardType.Number
-                            ),
-                            singleLine = true,
-                            colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = Color(0xFF00A8A8),
-                                unfocusedIndicatorColor = Color(0xFFCCCCCC),
-                                cursorColor = Color(0xFF00A8A8)
-                            ),
-                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-                            supportingText = {
-                                if (!isSmsStep) {
-                                    Text(
-                                        text = "${phone.length}/9",
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.End,
-                                        color = Color.Gray,
-                                        fontSize = 12.sp
-                                    )
-                                } else {
-                                    // таймер / повторная отправка
-                                    if (timer > 0) {
+                                )
+
+                                Text(
+                                    text = if (!isSmsStep)
+                                        "Пожалуйста, введите свой номер телефона"
+                                    else
+                                        "Номер мобильного телефона +992 $savedPhoneNumber",
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF00A8A8),
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(bottom = 10.dp)
+                                )
+
+                                // Поле ввода (номер или код)
+                                OutlinedTextField(
+                                    value = phone,
+                                    onValueChange = { newText ->
+                                        val filtered = newText.filter { it.isDigit() }
+                                        if (!isSmsStep) {
+                                            // номер — до 9 цифр
+                                            if (filtered.length <= 9) phone = filtered
+                                        } else {
+                                            // код — до 4 цифр
+                                            if (filtered.length <= 4) phone = filtered
+                                        }
+                                    },
+                                    label = {
                                         Text(
-                                            text = "Отправить повторно через $timer сек",
-                                            modifier = Modifier.fillMaxWidth(),
-                                            textAlign = TextAlign.Center,
-                                            color = Color.Gray,
-                                            fontSize = 12.sp
+                                            if (!isSmsStep)
+                                                "Номер телефона"
+                                            else
+                                                "Введите SMS код "
                                         )
-                                    } else {
-                                        Text(
-                                            text = "Отправить код повторно",
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(top = 4.dp)
-                                                .clickable(enabled = !isLoading) {
-                                                    // При клике — имитируем повторную отправку и рестарт таймера
-                                                    scope.launch {
-                                                        if (isLoading) return@launch
-                                                        isLoading = true
-                                                        // здесь можно вызвать API повторной отправки
-                                                        // имитируем задержку
-                                                        delay(800)
-                                                        isLoading = false
 
+                                    },
+                                    placeholder = {
+                                        if (isSmsStep) {
+                                            Text("XXXX", color = Color.Gray)
+                                        }
+                                    },
+                                    leadingIcon = {
+                                        if (!isSmsStep) {
+                                            Text(
+                                                "+992",
+                                                color = Color(0xFF00A8A8),
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        } else {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.sms),
+                                                contentDescription = "SMS",
+                                                tint = Color(0xFF00A8A8),
+                                                modifier = Modifier
+                                                    .height(24.dp)
+                                                    .width(24.dp)
+
+                                            )
+                                        }
+                                    },
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = if (!isSmsStep) KeyboardType.Phone else KeyboardType.Number
+                                    ),
+                                    singleLine = true,
+                                    colors = TextFieldDefaults.colors(
+                                        focusedIndicatorColor = Color(0xFF00A8A8),
+                                        unfocusedIndicatorColor = Color(0xFFCCCCCC),
+                                        cursorColor = Color(0xFF00A8A8)
+                                    ),
+                                    modifier = Modifier.fillMaxWidth()
+                                        .focusRequester(focusRequester),
+                                    supportingText = {
+                                        if (!isSmsStep) {
+                                            Text(
+                                                text = "${phone.length}/9",
+                                                modifier = Modifier.fillMaxWidth(),
+                                                textAlign = TextAlign.End,
+                                                color = Color.Gray,
+                                                fontSize = 12.sp
+                                            )
+                                        } else {
+                                            // таймер / повторная отправка
+                                            if (timer > 0) {
+                                                Text(
+                                                    text = "Отправить повторно через $timer сек",
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    textAlign = TextAlign.Center,
+                                                    color = Color.Gray,
+                                                    fontSize = 12.sp
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "Отправить код повторно",
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(top = 4.dp)
+                                                        .clickable(enabled = !isLoading) {
+                                                            // При клике — имитируем повторную отправку и рестарт таймера
+                                                            scope.launch {
+                                                                if (isLoading) return@launch
+                                                                isLoading = true
+                                                                // здесь можно вызвать API повторной отправки
+                                                                // имитируем задержку
+                                                                delay(800)
+                                                                isLoading = false
+
+                                                                timer = 60
+                                                                while (timer > 0) {
+                                                                    delay(1000)
+                                                                    timer--
+                                                                }
+                                                            }
+                                                        },
+                                                    textAlign = TextAlign.Center,
+                                                    color = Color(0xFF00A8A8),
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+
+                                Spacer(modifier = Modifier.height(40.dp))
+
+                                // Кнопка Далее / Подтвердить
+                                Button(
+                                    onClick = {
+                                        if (!isSmsStep) {
+                                            // отправка номера
+                                            scope.launch {
+                                                if (isLoading) return@launch
+                                                isLoading = true
+
+                                                // если номер короче 9 символов — не отправляем
+                                                if (phone.length != 9) {
+                                                    // можно показать ошибку — но пока просто вернем isLoading = false
+                                                    isLoading = false
+                                                    return@launch
+                                                }
+                                                val hash = Until.sha256(Until.getDeviceId() + phone)
+                                                val map = hashMapOf(
+                                                    "PhoneNumber" to phone,
+                                                    "DeviceId" to Until.getDeviceId(),
+                                                    "Hash" to hash
+                                                )
+
+                                                val result = client?.request<PhoneResponse>(
+                                                    path = Constant.chackPhoneNumber,
+                                                    params = map,
+                                                )
+
+                                                result?.onSuccess { body ->
+                                                    if (body.code == 1) {
+                                                        isLoading = false
+                                                        savedPhoneNumber = phone
+                                                        phone = ""
+                                                        isSmsStep = true
+                                                        // старт таймера
+                                                        scope.launch {
+                                                            timer = 60
+                                                            while (timer > 0) {
+                                                                delay(1000)
+                                                                timer--
+                                                            }
+                                                        }
+                                                    } else {
+                                                        ToastManager.show(body.message)
+                                                        isLoading = false
+                                                    }
+                                                }?.onError {
+                                                    // обработка ошибки
+                                                    isLoading = false
+                                                } ?: run {
+                                                    // если client == null — просто переключаемся (для preview)
+                                                    isLoading = false
+                                                    savedPhoneNumber = phone
+                                                    phone = ""
+                                                    isSmsStep = true
+                                                    scope.launch {
                                                         timer = 60
                                                         while (timer > 0) {
                                                             delay(1000)
                                                             timer--
                                                         }
                                                     }
-                                                },
-                                            textAlign = TextAlign.Center,
-                                            color = Color(0xFF00A8A8),
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    }
-                                }
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(40.dp))
-
-                        // Кнопка Далее / Подтвердить
-                        Button(
-                            onClick = {
-                                if (!isSmsStep) {
-                                    // отправка номера
-                                    scope.launch {
-                                        if (isLoading) return@launch
-                                        isLoading = true
-
-                                        // если номер короче 9 символов — не отправляем
-                                        if (phone.length != 9) {
-                                            // можно показать ошибку — но пока просто вернем isLoading = false
-                                            isLoading = false
-                                            return@launch
-                                        }
-                                        val hash = Until.sha256(phone + Until.getDeviceId())
-                                        val map = hashMapOf(
-                                            "PhoneNumber" to phone,
-                                            "DeviceId" to Until.getDeviceId(),
-                                            "Hash" to hash
-                                        )
-
-                                        val result = client?.request<PhoneResponse>(
-                                            path = Constant.chackPhoneNumber,
-                                            params = map,
-                                        )
-
-                                        result?.onSuccess { body ->
-                                            if (body.code == 1) {
-                                                isLoading = false
-                                                savedPhoneNumber = phone
-                                                phone = ""
-                                                isSmsStep = true
-                                                // старт таймера
-                                                scope.launch {
-                                                    timer = 60
-                                                    while (timer > 0) {
-                                                        delay(1000)
-                                                        timer--
-                                                    }
                                                 }
-                                            } else {
-                                                ToastManager.show(body.message)
-                                                isLoading = false
                                             }
-                                        }?.onError {
-                                            // обработка ошибки
-                                            isLoading = false
-                                        } ?: run {
-                                            // если client == null — просто переключаемся (для preview)
-                                            isLoading = false
-                                            savedPhoneNumber = phone
-                                            phone = ""
-                                            isSmsStep = true
+                                        } else {
                                             scope.launch {
-                                                timer = 60
-                                                while (timer > 0) {
-                                                    delay(1000)
-                                                    timer--
+                                                if (isLoading) return@launch
+                                                isLoading = true
+
+                                                if (phone.length != 4) {
+                                                    ToastManager.show("Check SMS")
+                                                    isLoading = false
+                                                    return@launch
+                                                }
+
+                                                val hash =
+                                                    Until.sha256(Until.getDeviceId() + phone + savedPhoneNumber)
+                                                val map = hashMapOf(
+                                                    "PhoneNumber" to savedPhoneNumber,
+                                                    "DeviceId" to Until.getDeviceId(),
+                                                    "Code" to phone,
+                                                    "Hash" to hash
+                                                )
+
+                                                val result = client?.request<PhoneResponse>(
+                                                    path = Constant.checkSMS,
+                                                    params = map,
+                                                )
+
+                                                result?.onSuccess { body ->
+                                                    if (body.code == 1) {
+                                                        body.data?.token?.let { AppSettings.putString("token",it) }
+                                                        body.data?.car_id?.let { AppSettings.putInt("car_id",it) }
+                                                        navigator.replace(MainRootScreen)
+                                                    } else {
+                                                        navigator.replace(MainRootScreen)
+                                                        snackbarMessage = body.message   // 🔥 ВОТ ОН
+                                                        //     ToastManager.show(body.message)
+                                                        isLoading = false
+                                                    }
+                                                }?.onError {
+                                                    isLoading = false
+                                                } ?: run {
+                                                    isLoading = false
                                                 }
                                             }
+
+                                            println("Отправляем/проверяем код: $phone")
+                                        }
+                                    },
+
+                                    enabled = !isLoading, // кнопка выключена во время загрузки
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(56.dp),
+                                    shape = RoundedCornerShape(28.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFF00D4D4),
+                                        disabledContainerColor = Color(0xFFAAD7D7)
+                                    )
+                                ) {
+                                    // Контент кнопки: фиксированная высота контейнера, чтобы не было сдвигов
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(24.dp), // фиксированная высота содержимого кнопки
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isLoading) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(20.dp),
+                                                strokeWidth = 2.5.dp,
+                                                color = Color.White
+                                            )
+                                        } else {
+                                            Text(
+                                                text = if (!isSmsStep) "Далее" else "Подтвердить",
+                                                fontSize = 18.sp,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
                                         }
                                     }
-                                } else {
-                                    scope.launch {
-                                        if (isLoading) return@launch
-                                        isLoading = true
-
-                                        if (phone.length != 4) {
-                                            ToastManager.show("Check SMS")
-                                            isLoading = false
-                                            return@launch
-                                        }
-
-                                        val hash =
-                                            Until.sha256(savedPhoneNumber + Until.getDeviceId() + phone)
-                                        val map = hashMapOf(
-                                            "PhoneNumber" to phone,
-                                            "DeviceId" to Until.getDeviceId(),
-                                            "Code" to phone,
-                                            "Hash" to hash
-                                        )
-
-                                        val result = client?.request<PhoneResponse>(
-                                            path = Constant.checkSMS,
-                                            params = map,
-                                        )
-
-                                        result?.onSuccess { body ->
-                                            if (body.code == 1) {
-                                                navigator.replace(MainRootScreen)
-                                            } else {
-                                                navigator.replace(MainRootScreen)
-                                                snackbarMessage = body.message   // 🔥 ВОТ ОН
-                                           //     ToastManager.show(body.message)
-                                                isLoading = false
-                                            }
-                                        }?.onError {
-                                            isLoading = false
-                                        } ?: run {
-                                            isLoading = false
-                                        }
-                                    }
-
-                                    println("Отправляем/проверяем код: $phone")
-                                }
-                            },
-
-                            enabled = !isLoading, // кнопка выключена во время загрузки
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            shape = RoundedCornerShape(28.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF00D4D4),
-                                disabledContainerColor = Color(0xFFAAD7D7)
-                            )
-                        ) {
-                            // Контент кнопки: фиксированная высота контейнера, чтобы не было сдвигов
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(24.dp), // фиксированная высота содержимого кнопки
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isLoading) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.5.dp,
-                                        color = Color.White
-                                    )
-                                } else {
-                                    Text(
-                                        text = if (!isSmsStep) "Далее" else "Подтвердить",
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
                                 }
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(100.dp))
                     }
                 }
 
-                Spacer(modifier = Modifier.height(100.dp))
-            }
         }
-    }
     }
 }

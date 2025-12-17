@@ -11,5 +11,6 @@ data class PhoneResponse(
 
 @Serializable
 data class PhoneData(
-    val exists: Boolean? = null
+    val token: String?=null,
+    val car_id: Int?=null,
 )

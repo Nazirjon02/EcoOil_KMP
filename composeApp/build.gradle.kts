@@ -54,6 +54,11 @@ kotlin {
             api("cafe.adriel.voyager:voyager-tab-navigator:1.0.0")
             api("cafe.adriel.voyager:voyager-transitions:1.0.0")
 
+            // commonMain
+            implementation("com.russhwolf:multiplatform-settings-no-arg:1.1.1")
+
+
+
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)

@@ -5,14 +5,14 @@ import androidx.compose.ui.graphics.Color
 object Constant {
     //POST
     const val baseUrl="http://95.142.86.183:8080"
-    const val chackPhoneNumber="/check_phone_number"
-    const val checkSMS="/check_verification_code"
-    const val getTransactions="/get_transactions"
-    const val getCar="/get_car_data"
-    const val getStocks="/get_stocks"
-    const val getToken="/set_car_token_notification"
-    const val getQr="/set_car_qr_code"
-    const val getMap="/get_station_map_data"
+    const val chackPhoneNumber="/check_phone_number" // DeviceId + PhoneNumber
+    const val checkSMS="/check_verification_code"  // DeviceId + Code + PhoneNumber
+    const val getTransactions="/get_transactions"  // DeviceId + Token + CarId
+    const val getCar="/get_car_data"  // Token + CarId + DeviceId   якум запрос после смс
+    const val getStocks="/get_stocks"  // CarId + Token + DeviceId   н акция
+    const val getToken="/set_car_token_notification"  // CarId + Token + DeviceId + TokenNotification + Code  файрбес
+    const val getQr="/set_car_qr_code"  // CarId + Token + Limit + DeviceId
+    const val getMap="/get_station_map_data"  // CarId + Token + DeviceId
 }
 object Color{
 

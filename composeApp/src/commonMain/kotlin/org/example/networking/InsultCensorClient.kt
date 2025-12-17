@@ -19,7 +19,7 @@ class InsultCensorClient(
         path: String,
         method: HttpMethod = HttpMethod.Post,
         bodyObj: Any? = null,
-        params: Map<String, String>? = null
+        params: Map<String, Any>? = null
     ): Result<T, NetworkError> {
 
         val url = "$baseUrl$path"
@@ -36,6 +36,9 @@ class InsultCensorClient(
         val response: HttpResponse = try {
             http.request(url) {
                 this.method = method
+                // 🔥 ОБЯЗАТЕЛЬНО
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
 
                 params?.forEach { (k, v) ->
                     parameter(k, v)
