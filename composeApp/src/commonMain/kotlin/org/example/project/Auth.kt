@@ -345,7 +345,6 @@ fun AppContent(client: InsultCensorClient?) {
                                                         body.data?.car_id?.let { AppSettings.putInt("car_id",it) }
                                                         navigator.replace(MainRootScreen)
                                                     } else {
-                                                        navigator.replace(MainRootScreen)
                                                         snackbarMessage = body.message   // 🔥 ВОТ ОН
                                                         //     ToastManager.show(body.message)
                                                         isLoading = false

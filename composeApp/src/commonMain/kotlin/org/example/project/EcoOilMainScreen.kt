@@ -38,6 +38,7 @@ import ecooil_kmp.composeapp.generated.resources.ecooil_text
 import ecooil_kmp.composeapp.generated.resources.home
 import ecooil_kmp.composeapp.generated.resources.map
 import ecooil_kmp.composeapp.generated.resources.right_arrow
+import org.example.project.home.BalanceItem
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -214,14 +215,7 @@ fun EcoOilMainScreen() {
         }
     }
 
-    @Composable
-    fun BalanceItem(label: String, amount: String, amountColor: Color) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = label, fontSize = 14.sp, color = Color.Gray)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = amount, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = amountColor)
-        }
-    }
+
 
     data class Fuel(
         val name: String,

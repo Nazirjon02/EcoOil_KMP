@@ -8,16 +8,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import cafe.adriel.voyager.navigator.tab.Tab
+import cafe.adriel.voyager.navigator.tab.TabOptions
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.call
 import ecooil_kmp.composeapp.generated.resources.communication
 import ecooil_kmp.composeapp.generated.resources.home_info
+import ecooil_kmp.composeapp.generated.resources.right_arrow
 import org.example.project.AuthScreen
 import org.example.util.AppSettings
 import org.jetbrains.compose.resources.DrawableResource
@@ -25,7 +29,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 // ------------------------- InfoScreen -------------------------
-object InfoScreen : Screen {
+object InfoScreen : Tab {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -37,6 +41,17 @@ object InfoScreen : Screen {
             }
         )
     }
+
+    override val options: TabOptions
+        @Composable
+        get()  {
+            val icon = painterResource(Res.drawable.right_arrow)
+        return TabOptions(
+            index = 0u,
+            title = "Info",
+            icon=icon
+        )
+        }
 }
 
 // ------------------------- InfoScreenContent -------------------------
@@ -55,19 +70,20 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
 
         // ──────── Профиль ────────
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 50.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFDFE6EE)),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 32.dp),
+                    .padding(vertical = 22.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(85.dp)
                         .clip(CircleShape)
                         .background(Color(0xFF2089CE)),
                     contentAlignment = Alignment.Center
@@ -80,24 +96,24 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     "Test",
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF092F48)
                 )
                 Text(
                     "EcoOil",
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1B5E20)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
         // ──────── Личная информация ────────
         Card(
@@ -167,7 +183,9 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
             onClick = onExit, // Переход через callback
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(bottom = 30.dp)
                 .height(50.dp),
+
             shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF1E88E5),

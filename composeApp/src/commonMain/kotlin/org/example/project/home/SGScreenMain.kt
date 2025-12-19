@@ -1,5 +1,6 @@
 package org.example.project.home
 
+import InfoScreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +29,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
 import ecooil_kmp.composeapp.generated.resources.ic_ai92
@@ -41,6 +46,8 @@ import org.example.data.CarResponse
 import org.example.data.FuelItem
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
+import org.example.project.MainRootScreen
+import org.example.project.QrScreen
 import org.example.util.AppSettings
 import org.example.util.onError
 import org.example.util.onSuccess
@@ -50,10 +57,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun SGScreenMain(client: InsultCensorClient?) {
     val scroll = rememberScrollState()
+    val navigator = LocalNavigator.current
+
     // 🔹 State для данных экрана
     var userName by remember { mutableStateOf("Test") }
-    var bonusText by remember { mutableStateOf("0.00 C") }
-    var balanceText by remember { mutableStateOf("0.00 C") }
+    var bonusText by remember { mutableStateOf("0.00 c") }
+    var balanceText by remember { mutableStateOf("0.00 c") }
     var statusText by remember { mutableStateOf("Status / SG Lite") }
     var fuelItems2 by remember {
         mutableStateOf(
@@ -70,6 +79,8 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 bonusText = "${body.data?.car_data?.car_pip_size ?: 0} C"
                 balanceText = "${body.data?.car_data?.car_balance_size ?: 0} C"
                 statusText = body.data?.car_data?.pip_status_type.toString()
+                AppSettings.putString("car_number",body.data?.car_data?.car_number.toString())
+
                 val oil = body.data?.car_oil
 
                 if (oil != null) {
@@ -92,17 +103,29 @@ fun SGScreenMain(client: InsultCensorClient?) {
     LaunchedEffect(Unit) {
         loadData()
     }
+    val state = rememberPullToRefreshState()
+
+//    PullToRefreshBox(
+//        isRefreshing = isRefreshing,
+//        onRefresh = onRefresh,
+//        modifier  = Modifier
+//            .fillMaxWidth()
+//
+//        ) {
+//
+//    }
+
     _root_ide_package_.org.example.project.GradientBackground(showVersion = false) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scroll)
-            //    .padding(16.dp)
         ) {
             HomeTopBar(
                 userName = userName,
                 onProfileClick = {
-
+                   navigator?.parent?.push(InfoScreen)
                     /* открыть профиль */
                 },
                 onNotificationClick = { /* открыть уведомления */ }
@@ -115,7 +138,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 elevation = CardDefaults.cardElevation(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, top = 5.dp, bottom = 32.dp)
+                    .padding(start = 34.dp, end = 34.dp, top = 5.dp, bottom = 22.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -125,7 +148,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                         painter = painterResource(Res.drawable.ecooil_text),
                         contentDescription = "EcoOil",
                         modifier = Modifier.height(60.dp)
-                            .padding(16.dp)
+                            .padding(18.dp)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -134,7 +157,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        _root_ide_package_.org.example.project.BalanceItem(
+                       BalanceItem(
                             label = "БОНУС",
                             amount = bonusText,
                             amountColor = Color(0xFFFF6B00)
@@ -143,7 +166,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                             modifier = Modifier.width(1.dp).height(40.dp)
                                 .background(Color(0xFFE0E0E0))
                         )
-                        _root_ide_package_.org.example.project.BalanceItem(
+                        BalanceItem(
                             label = "БАЛАНС",
                             amount = balanceText,
                             amountColor = Color(0xFF00A8A8)
@@ -154,7 +177,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
                     Text(
                         text = "Status / $statusText",
-                        fontSize = 18.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black.copy(alpha = 0.7f)
                     )
@@ -165,7 +188,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
             // ---- АКЦИИ ----
             Text(
-                "Акции", fontSize = 22.sp, fontWeight = FontWeight.SemiBold,
+                "Акции", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(16.dp, 0.dp)
             )
 
@@ -177,8 +200,8 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 ) {
                 items(5) {
                     Card(
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.size(90.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(80.dp),
                         elevation = CardDefaults.cardElevation(6.dp)
                     ) {
                         Image(
@@ -194,7 +217,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
             // ---- ТОПЛИВО ----
             Text(
-                "Деньги на топливо", fontSize = 22.sp, fontWeight = FontWeight.SemiBold,
+                "Деньги на топливо", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(16.dp, 0.dp)
             )
 
@@ -210,7 +233,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
                         Card(
                             shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier.size(90.dp)
+                            modifier = Modifier.size(60.dp)
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -244,13 +267,14 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "История", fontSize = 22.sp,
+                    "История", fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp, 0.dp)
                 )
                 Icon(
                     painter = painterResource(Res.drawable.right_arrow),
                     contentDescription = null,
-                    modifier = Modifier.height(35.dp)
+                    modifier = Modifier.height(30.dp)
                         .padding(end = 16.dp, top = 5.dp, bottom = 5.dp, start = 0.dp)
                 )
             }
@@ -405,6 +429,16 @@ fun HomeTopBar(
         }
     }
 }
+
+@Composable
+fun BalanceItem(label: String, amount: String, amountColor: Color) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = label, fontSize = 13.sp, color = Color.Gray)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(text = amount, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = amountColor)
+    }
+}
+
 suspend fun requestCarData(
     client: InsultCensorClient?,
     onSuccess: (CarResponse) -> Unit,
