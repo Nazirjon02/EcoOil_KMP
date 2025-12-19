@@ -83,10 +83,11 @@ object QrScreen : Screen {
                             .aspectRatio(1f)
                     )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(20.dp))
 
                     Text(
-                        text = "QR актуален: ${secondsLeft / 60}:${(secondsLeft % 60).toString().padStart(2, '0')}",
+                        text = "QR актуален: ${secondsLeft / 60}:${(secondsLeft % 60).toString()
+                            .padStart(2, '0')}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

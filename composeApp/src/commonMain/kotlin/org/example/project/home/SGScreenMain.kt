@@ -80,6 +80,10 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 balanceText = "${body.data?.car_data?.car_balance_size ?: 0} C"
                 statusText = body.data?.car_data?.pip_status_type.toString()
                 AppSettings.putString("car_number",body.data?.car_data?.car_number.toString())
+                AppSettings.putString("car_name",body.data?.car_data?.car_name.toString())
+                AppSettings.putString("car_phone_number",body.data?.car_data?.car_phone_number.toString())
+                AppSettings.putString("pip_status_type",body.data?.car_data?.pip_status_type.toString())
+                AppSettings.putString("car_birth_date_time",body.data?.car_data?.car_birth_date_time.toString())
 
                 val oil = body.data?.car_oil
 
@@ -284,7 +288,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp, 0.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 20.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(Color.White),
                 elevation = CardDefaults.cardElevation(8.dp)

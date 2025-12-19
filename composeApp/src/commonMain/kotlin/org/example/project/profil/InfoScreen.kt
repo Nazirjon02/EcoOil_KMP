@@ -8,16 +8,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import ecooil_kmp.composeapp.generated.resources.Res
+import ecooil_kmp.composeapp.generated.resources.arrow_back_ios
 import ecooil_kmp.composeapp.generated.resources.call
 import ecooil_kmp.composeapp.generated.resources.communication
 import ecooil_kmp.composeapp.generated.resources.home_info
@@ -38,6 +38,9 @@ object InfoScreen : Tab {
             onExit = {
                 AppSettings.clear()           // Очистка токена
                 navigator.replace(AuthScreen) // Переход на AuthScreen
+            },
+            onBackAction={
+                navigator.pop()
             }
         )
     }
@@ -57,7 +60,7 @@ object InfoScreen : Tab {
 // ------------------------- InfoScreenContent -------------------------
 @Composable
 @Preview(showBackground = true)
-fun InfoScreenContent(onExit: () -> Unit = {}) {
+fun InfoScreenContent(onExit: () -> Unit = {} ,onBackAction: () -> Unit = {} ) {
     val scrollState = rememberScrollState()
 
     Column(
@@ -68,10 +71,12 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
             .padding(16.dp)
     ) {
 
+        ProfileTopBar(onBack = { onBackAction() })
+
         // ──────── Профиль ────────
         Card(
-            modifier = Modifier.fillMaxWidth()
-                .padding(top = 50.dp),
+            modifier = Modifier.fillMaxWidth(),
+
             colors = CardDefaults.cardColors(containerColor = Color(0xFFDFE6EE)),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
@@ -89,7 +94,7 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "T",
+                        text =AppSettings.getString("car_name","****")[0].toString(),
                         color = Color.White,
                         fontSize = 48.sp,
                         fontWeight = FontWeight.Bold
@@ -99,13 +104,13 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    "Test",
+                    "EcoOil",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF092F48)
                 )
                 Text(
-                    "EcoOil",
+                    AppSettings.getString("car_name","****"),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1B5E20)
@@ -130,25 +135,25 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
 
-                InfoRow(label = "Номер авто", value = "2222АА01")
+                InfoRow(label = "Номер авто", value = AppSettings.getString("car_number","******"))
                 Divider(
                     thickness = 1.dp,
                     color = Color(0xFFE0E0E0),
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
-                InfoRow(label = "Номер телефона", value = "92***")
+                InfoRow(label = "Номер телефона", value = AppSettings.getString("car_phone_number","92****"))
                 Divider(
                     thickness = 1.dp,
                     color = Color(0xFFE0E0E0),
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
-                InfoRow(label = "Дата рождения", value = "24.05.2002")
+                InfoRow(label = "Дата рождения", value = AppSettings.getString("car_birth_date_time","**.**.**").substringBefore(" "))
                 Divider(
                     thickness = 1.dp,
                     color = Color(0xFFE0E0E0),
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
-                InfoRow(label = "Тип статуса", value = "SG Lite")
+                InfoRow(label = "Тип статуса", value = AppSettings.getString("pip_status_type","****"))
             }
         }
 
@@ -160,23 +165,36 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                val uriHandler = LocalUriHandler.current
                 ContactRow(
                     text = "Тоҷикистон, г. Душанбе, ул. Баховуддин 15",
-                    icon = Res.drawable.home_info
-                )
-                Spacer(modifier = Modifier.height(24.dp))
+                    icon = Res.drawable.home_info,
+                ){
+                    uriHandler.openUri("geo:38.552573,68.851528")
+                }
+
+               Spacer(modifier = Modifier.height(10.dp))
+
                 ContactRow(
                     text = "4800",
                     icon = Res.drawable.call
-                )
-                Spacer(modifier = Modifier.height(24.dp))
+                ){
+                    uriHandler.openUri("tel:4800")
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 ContactRow(
                     text = "info@ecooil.tj",
                     icon = Res.drawable.communication
-                )
+                ){
+                    uriHandler.openUri("mailto:info@ecooil.tj")
+                }
             }
+
         }
+
 
         Spacer(modifier = Modifier.height(40.dp))
         Button(
@@ -208,6 +226,8 @@ fun InfoScreenContent(onExit: () -> Unit = {}) {
     }
 }
 
+
+
 // ------------------------- Универсальные компоненты -------------------------
 @Composable
 private fun InfoRow(label: String, value: String) {
@@ -221,36 +241,92 @@ private fun InfoRow(label: String, value: String) {
 }
 
 @Composable
-private fun ContactRow(text: String, icon: DrawableResource) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun ContactRow(
+    text: String,
+    icon: DrawableResource,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 10.dp)
+    ) {
         Card(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.size(45.dp),
             colors = CardDefaults.cardColors(Color(0x46969B9E))
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Icon(
                     painter = painterResource(icon),
                     contentDescription = null,
                     tint = Color(0xFF1E88E5),
-                    modifier = Modifier
-                        .size(38.dp)
-                        .padding(7.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(Modifier.width(16.dp))
 
         Text(
             text = text,
             fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
+
+@Composable
+fun ProfileTopBar(
+    onBack: () -> Unit = {},
+) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 0.dp, end = 12.dp, top = 40.dp, bottom = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .clickable { onBack() },
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.arrow_back_ios),
+                        contentDescription = null,
+                        tint = Color(0xFF1E88E5),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(7.dp)
+                    )
+                }
+
+
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+        }
+    }
+}
+
+
