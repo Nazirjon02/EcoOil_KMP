@@ -7,6 +7,6 @@ import cafe.adriel.voyager.core.screen.Screen
 object MapScreen : Screen {
     @Composable
     override fun Content() {
-        Text("Map  Screen")
+        MapsLayout()
     }
 }
