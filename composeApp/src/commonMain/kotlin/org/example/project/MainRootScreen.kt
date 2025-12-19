@@ -18,6 +18,7 @@ import ecooil_kmp.composeapp.generated.resources.icqr_code
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.createHttpClient
+import org.example.project.home.HomeViewModel
 import org.example.project.home.SGScreenMain
 import org.example.project.map.MapScreen
 import org.jetbrains.compose.resources.painterResource
@@ -85,7 +86,10 @@ object HomeTab : Tab {
                 baseUrl = Constant.baseUrl
             )
         }
-        SGScreenMain(client)
+        val viewModel: HomeViewModel = remember {
+            HomeViewModel(client)
+        }
+        SGScreenMain(client,viewModel)
     }
 }
 

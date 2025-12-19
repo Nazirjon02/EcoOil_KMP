@@ -45,6 +45,7 @@ import ecooil_kmp.composeapp.generated.resources.user
 import org.example.data.CarResponse
 import org.example.data.FuelItem
 import org.example.networking.Constant
+import org.example.networking.Constant.isLoaded
 import org.example.networking.InsultCensorClient
 import org.example.project.MainRootScreen
 import org.example.project.QrScreen
@@ -55,70 +56,25 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
-fun SGScreenMain(client: InsultCensorClient?) {
+fun SGScreenMain(client: InsultCensorClient?, viewModel: HomeViewModel) {
     val scroll = rememberScrollState()
     val navigator = LocalNavigator.current
 
-    // 🔹 State для данных экрана
-    var userName by remember { mutableStateOf("Test") }
-    var bonusText by remember { mutableStateOf("0.00 c") }
-    var balanceText by remember { mutableStateOf("0.00 c") }
-    var statusText by remember { mutableStateOf("Status / SG Lite") }
-    var fuelItems2 by remember {
-        mutableStateOf(
-            listOf<FuelItem>()
-        )
-    }
 
-    // 🔹 Загрузка данных (НЕ composable!)
-    suspend fun loadData() {
-        requestCarData(
-            client = client,
-            onSuccess = { body ->
-                userName = body.data?.car_data?.car_name ?: userName
-                bonusText = "${body.data?.car_data?.car_pip_size ?: 0} C"
-                balanceText = "${body.data?.car_data?.car_balance_size ?: 0} C"
-                statusText = body.data?.car_data?.pip_status_type.toString()
-                AppSettings.putString("car_number",body.data?.car_data?.car_number.toString())
-                AppSettings.putString("car_name",body.data?.car_data?.car_name.toString())
-                AppSettings.putString("car_phone_number",body.data?.car_data?.car_phone_number.toString())
-                AppSettings.putString("pip_status_type",body.data?.car_data?.pip_status_type.toString())
-                AppSettings.putString("car_birth_date_time",body.data?.car_data?.car_birth_date_time.toString())
+    val userName = viewModel.userName
+    val bonusText = viewModel.bonusText
+    val balanceText = viewModel.balanceText
+    val statusText = viewModel.statusText
+    val fuelItems2 = viewModel.fuelItems
 
-                val oil = body.data?.car_oil
-
-                if (oil != null) {
-                    fuelItems2 = listOf(
-                        FuelItem("АИ-95", "${oil.ai95} cмн", Res.drawable.ic_ai95),
-                        FuelItem("АИ-92", "${oil.ai92} cмн", Res.drawable.ic_ai92),
-                        FuelItem("ДТ", "${oil.dt} cмн", Res.drawable.ic_dt),
-                        FuelItem("ДТ-Экто", "${oil.dtecto} cмн", Res.drawable.ic_dtecto),
-                        FuelItem("ГАЗ", "${oil.gas} cмн", Res.drawable.ic_gas)
-                    )
-                }
-            },
-            onError = {
-                // при необходимости: лог / toast
-            }
-        )
-    }
-
-    // ✅ ВЫЗЫВАЕТСЯ 1 РАЗ при открытии экрана
-    LaunchedEffect(Unit) {
-        loadData()
-    }
     val state = rememberPullToRefreshState()
 
-//    PullToRefreshBox(
-//        isRefreshing = isRefreshing,
-//        onRefresh = onRefresh,
-//        modifier  = Modifier
-//            .fillMaxWidth()
-//
-//        ) {
-//
-//    }
-
+    PullToRefreshBox(
+        isRefreshing = isLoaded,
+        onRefresh = { viewModel.refresh() }
+    ) {
+        // Ваш UI
+    }
     _root_ide_package_.org.example.project.GradientBackground(showVersion = false) {
 
         Column(
@@ -198,7 +154,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(start = 16.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
                 modifier = Modifier.padding(vertical = 12.dp),
 
                 ) {
@@ -227,7 +183,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(start = 16.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
                 modifier = Modifier.padding(top = 12.dp)
             ) {
                 items(fuelItems2) { item ->
@@ -296,10 +252,7 @@ fun SGScreenMain(client: InsultCensorClient?) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     repeat(4) {
                         Card(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp),
-
+                            Modifier.fillMaxWidth().padding(bottom = 12.dp),
                             elevation = CardDefaults.cardElevation(4.dp)
                         ) {
 
@@ -449,15 +402,15 @@ suspend fun requestCarData(
     onError: (Throwable?) -> Unit
 ) {
     try {
-        val hash = _root_ide_package_.org.example.project.Until.sha256(
+        val hash = org.example.project.Until.sha256(
             AppSettings.getString("token") +
                     AppSettings.getInt("car_id") +
-                    _root_ide_package_.org.example.project.Until.getDeviceId()
+                    org.example.project.Until.getDeviceId()
         )
 
         val map = hashMapOf(
             "Token" to AppSettings.getString("token"),
-            "DeviceId" to _root_ide_package_.org.example.project.Until.getDeviceId(),
+            "DeviceId" to org.example.project.Until.getDeviceId(),
             "CarId" to AppSettings.getInt("car_id").toString(),
             "Limit" to 0,
             "Hash" to hash
@@ -465,6 +418,46 @@ suspend fun requestCarData(
 
         val result = client?.request<CarResponse>(
             path = Constant.getCar,
+            params = map,
+        )
+
+        result?.onSuccess { body ->
+            if (body.code == 1) {
+                onSuccess(body)
+            } else {
+                onError(null)
+            }
+        }?.onError { e ->
+        } ?: run {
+            onError(null)
+        }
+    } catch (e: Throwable) {
+        onError(e)
+    }
+}
+
+suspend fun getTransactions(
+    client: InsultCensorClient?,
+    onSuccess: (CarResponse) -> Unit,
+    onError: (Throwable?) -> Unit
+) {
+    try {
+        val hash = org.example.project.Until.sha256(
+            org.example.project.Until.getDeviceId() +
+                    AppSettings.getString("token") +
+                    AppSettings.getInt("car_id")
+        )
+
+        val map = hashMapOf(
+            "Token" to AppSettings.getString("token"),
+            "DeviceId" to org.example.project.Until.getDeviceId(),
+            "CarId" to AppSettings.getInt("car_id").toString(),
+            "Limit" to 0,
+            "Hash" to hash
+        )
+
+        val result = client?.request<CarResponse>(
+            path = Constant.getTransactions,
             params = map,
         )
 

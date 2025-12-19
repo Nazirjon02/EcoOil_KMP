@@ -1,5 +1,7 @@
 package org.example.networking
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
 object Constant {
@@ -13,6 +15,8 @@ object Constant {
     const val getToken="/set_car_token_notification"  // CarId + Token + DeviceId + TokenNotification + Code  файрбес
     const val getQr="/set_car_qr_code"  // CarId + Token + Limit + DeviceId
     const val getMap="/get_station_map_data"  // CarId + Token + DeviceId
+    var isLoaded =false
+
 }
 object Color{
 

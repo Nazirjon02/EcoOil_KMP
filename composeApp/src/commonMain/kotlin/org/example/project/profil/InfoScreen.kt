@@ -37,7 +37,7 @@ object InfoScreen : Tab {
         InfoScreenContent(
             onExit = {
                 AppSettings.clear()           // Очистка токена
-                navigator.replace(AuthScreen) // Переход на AuthScreen
+                navigator.replaceAll(AuthScreen) // Переход на AuthScreen
             },
             onBackAction={
                 navigator.pop()
