@@ -13,10 +13,13 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.tab.*
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.home
+import ecooil_kmp.composeapp.generated.resources.icmap
+import ecooil_kmp.composeapp.generated.resources.icqr_code
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.createHttpClient
 import org.example.project.home.SGScreenMain
+import org.example.project.map.MapScreen
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -90,7 +93,7 @@ object EmptyTab : Tab {
     override val options: TabOptions
         @Composable get() {
             val title = "Second"
-            val icon = painterResource(Res.drawable.home)
+            val icon = painterResource(Res.drawable.icqr_code)
             return TabOptions(index = 1u, title, icon)
         }
 
@@ -104,12 +107,12 @@ object SGTab : Tab {
     override val options: TabOptions
         @Composable get() {
             val title = "Profile"
-            val icon = painterResource(Res.drawable.home)
+            val icon = painterResource(Res.drawable.icmap)
             return TabOptions(index = 2u, title, icon)
         }
 
     @Composable
     override fun Content() {
-        InfoScreenContent()
+        MapScreen.Content()
     }
 }

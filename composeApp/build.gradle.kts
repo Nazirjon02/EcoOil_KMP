@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -54,8 +53,10 @@ kotlin {
             api("cafe.adriel.voyager:voyager-tab-navigator:1.0.0")
             api("cafe.adriel.voyager:voyager-transitions:1.0.0")
 
-            // commonMain
-            implementation("com.russhwolf:multiplatform-settings-no-arg:1.1.1")
+            implementation(libs.multiplatform.settings.no.arg)
+
+          //  implementation("com.google.zxing:core:3.5.3")
+            implementation(libs.qrose)
 
 
 
