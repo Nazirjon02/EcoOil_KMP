@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 import org.example.data.FuelItem
 import org.example.networking.Constant.isLoaded
 import org.example.networking.InsultCensorClient
+import org.example.util.AppSettings
+
 class HomeViewModel(
     private val client: InsultCensorClient?
 ) : ViewModel() {
@@ -81,6 +83,13 @@ class HomeViewModel(
                             )
                         } ?: emptyList()
                     )
+
+                    AppSettings.putString("car_name",body.data?.car_data?.car_name.toString())
+                    AppSettings.putString("car_number",body.data?.car_data?.car_number.toString())
+                    AppSettings.putString("car_phone_number",body.data?.car_data?.car_phone_number.toString())
+                    AppSettings.putString("pip_status_type",body.data?.car_data?.pip_status_type.toString())
+                    AppSettings.putString("car_birth_date_time",body.data?.car_data?.car_birth_date_time.toString())
+
 
                     cache = newCache
                     applyCache(newCache)
