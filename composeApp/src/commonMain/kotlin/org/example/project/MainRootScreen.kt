@@ -1,6 +1,5 @@
 package org.example.project
 
-import InfoScreenContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
@@ -18,16 +17,33 @@ import ecooil_kmp.composeapp.generated.resources.icqr_code
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.createHttpClient
+import org.example.project.MainRootScreen.LocalHomeVm
 import org.example.project.home.HomeViewModel
 import org.example.project.home.SGScreenMain
 import org.example.project.map.MapScreen
+import org.example.project.qr.QrScreen
+import org.example.project.qr.QrViewModel
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 object MainRootScreen : Screen {
 
     @Composable
     override fun Content() {
+        val client = remember {
+            InsultCensorClient(
+                createHttpClient(PlatformHttpEngine()),
+                baseUrl = Constant.baseUrl
+            )
+        }
+        val viewModel: HomeViewModel = remember {
+            HomeViewModel(client)
+        }
+
+        val qrViewModel = remember {
+            QrViewModel(client)
+        }
+
+
         TabNavigator(HomeTab) { tabNavigator ->
 
             Scaffold(
@@ -62,14 +78,32 @@ object MainRootScreen : Screen {
                 }
             ) { padding ->
                 Box(Modifier.padding(padding)) {
-                    CurrentTab()
+                    CompositionLocalProvider(
+                        LocalClient provides client,
+                        LocalHomeVm provides viewModel,
+                        LocalQrVm provides qrViewModel
+                    ) {
+                        CurrentTab()
+                    }
                 }
             }
         }
     }
+    val LocalHomeVm = staticCompositionLocalOf<HomeViewModel?> {
+        null
+    }
+
+
+    val LocalClient = staticCompositionLocalOf<InsultCensorClient?> {
+        null
+    }
+
+    val LocalQrVm = staticCompositionLocalOf<QrViewModel> {
+        error("QrViewModel not provided")
+    }
+
 
 }
-
 object HomeTab : Tab {
     override val options: TabOptions
         @Composable get() {
@@ -80,16 +114,8 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
-        val client = remember {
-            InsultCensorClient(
-                createHttpClient(PlatformHttpEngine()),
-                baseUrl = Constant.baseUrl
-            )
-        }
-        val viewModel: HomeViewModel = remember {
-            HomeViewModel(client)
-        }
-        SGScreenMain(client,viewModel)
+        val vm = LocalHomeVm.current
+        SGScreenMain(client = null, viewModel = vm!!)
     }
 }
 
