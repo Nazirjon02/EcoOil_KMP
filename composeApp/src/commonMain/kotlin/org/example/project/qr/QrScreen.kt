@@ -39,11 +39,6 @@ object QrScreen : Screen {
 
         val vm = LocalQrVm.current
 
-        // стартуем цикл ОДИН раз на жизнь VM
-        LaunchedEffect(Unit) {
-            vm.start()
-        }
-
         val qrPainter = rememberQrCodePainter(vm.qrValue)
 
         GradientBackground(showVersion = false) {
@@ -71,7 +66,6 @@ object QrScreen : Screen {
             }
         }
     }
-
 }
 
 @Preview(showBackground = true)

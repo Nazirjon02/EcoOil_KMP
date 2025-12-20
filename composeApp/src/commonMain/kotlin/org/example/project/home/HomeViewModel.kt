@@ -36,7 +36,8 @@ class HomeViewModel(
     var fuelItems by mutableStateOf<List<FuelItem>>(emptyList())
         private set
 
-
+    var tokenError by mutableStateOf(false)
+        private set
     private var cache: HomeCache? = null   // 🔹 КЕШ
 
     init {
@@ -94,7 +95,9 @@ class HomeViewModel(
                     cache = newCache
                     applyCache(newCache)
                 },
-                onError = {}
+                onError = {
+                    tokenError=true
+                }
             )
             isLoaded = false
         }

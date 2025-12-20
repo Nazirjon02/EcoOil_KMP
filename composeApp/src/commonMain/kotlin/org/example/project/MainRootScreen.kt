@@ -18,6 +18,7 @@ import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.createHttpClient
 import org.example.project.MainRootScreen.LocalHomeVm
+import org.example.project.MainRootScreen.LocalQrVm
 import org.example.project.home.HomeViewModel
 import org.example.project.home.SGScreenMain
 import org.example.project.map.MapScreen
@@ -126,9 +127,15 @@ object EmptyTab : Tab {
             val icon = painterResource(Res.drawable.icqr_code)
             return TabOptions(index = 1u, title, icon)
         }
-
     @Composable
     override fun Content() {
+        val vm = LocalQrVm.current
+
+        // При каждом входе в таб — гарантируем refresh (если истёк) + запуск таймера
+        LaunchedEffect(Unit) {
+            vm.ensureCountdownRunning()
+        }
+
         QrScreen.Content()
     }
 }

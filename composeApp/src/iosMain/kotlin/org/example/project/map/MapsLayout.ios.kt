@@ -3,26 +3,15 @@ package org.example.project.map
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.UIKitView
 import platform.CoreLocation.CLLocationCoordinate2DMake
 import platform.MapKit.MKCoordinateRegionMakeWithDistance
 import platform.MapKit.MKMapView
 import platform.MapKit.MKPointAnnotation
 import kotlinx.cinterop.*
 import org.example.data.Location
-import platform.CoreLocation.*
 import platform.MapKit.*
-import platform.Foundation.*
 import platform.darwin.NSObject
-// iosMain — файл MapsLayout.kt
-
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.interop.UIKitView
-import kotlinx.cinterop.*
-import platform.CoreLocation.*
-import platform.MapKit.*
-import platform.Foundation.*
-import platform.darwin.*
 import kotlin.math.abs
 
 @OptIn(ExperimentalForeignApi::class) // Обязательно добавь это!

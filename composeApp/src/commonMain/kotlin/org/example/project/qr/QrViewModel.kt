@@ -20,7 +20,7 @@ class QrViewModel(
     private val client: InsultCensorClient
 ) : ViewModel() {
 
-    var secondsLeft by mutableStateOf(180)
+    var secondsLeft by mutableStateOf(0)  // стартуем с 0
         private set
 
     var qrValue by mutableStateOf("")
@@ -29,26 +29,29 @@ class QrViewModel(
     var isRefreshing by mutableStateOf(false)
         private set
 
-    private var loopJob: Job? = null
+    private var countdownJob: Job? = null
 
-
-    fun start() {
-        if (loopJob?.isActive == true) return
-
-        loopJob = viewModelScope.launch {
-            while (true) {
-                refreshNow()
-                secondsLeft = 180
-                while (secondsLeft > 0) {
-                    delay(1000)
-                    secondsLeft--
-                }
-            }
+    // Проверяем и обновляем QR, если таймер истёк или QR пустой
+    fun refreshIfNeeded() {
+        if (secondsLeft <= 0 || qrValue.isEmpty()) {
+            refreshNow()
         }
     }
 
+    // Запускаем таймер, если его нет (даже если secondsLeft == 0 — но после refresh будет 180)
+    private fun startCountdown() {
+        if (countdownJob?.isActive == true) return
 
-    fun refreshNow() {
+        countdownJob = viewModelScope.launch {
+            while (secondsLeft > 0) {
+                delay(1000)
+                secondsLeft--
+            }
+            // Когда дошёл до 0 — Job сам завершается
+        }
+    }
+
+    private fun refreshNow() {
         if (isRefreshing) return
         isRefreshing = true
 
@@ -65,13 +68,21 @@ class QrViewModel(
                     onSuccess = { /* обработка body */ },
                     onError = { /* лог/ошибка */ }
                 )
+                // Успешно — сбрасываем таймер и запускаем countdown
+                secondsLeft = 180
+                startCountdown()  // ← сразу запускаем таймер после обновления
             } finally {
                 isRefreshing = false
             }
         }
     }
-}
 
+    // Вызываем из таба: сначала refresh (если нужно), потом гарантированно стартуем таймер
+    fun ensureCountdownRunning() {
+        refreshIfNeeded()
+        startCountdown()  // всегда запускаем (если уже есть — не дублирует)
+    }
+}
 
 suspend fun requestQrData(
     client: InsultCensorClient?,

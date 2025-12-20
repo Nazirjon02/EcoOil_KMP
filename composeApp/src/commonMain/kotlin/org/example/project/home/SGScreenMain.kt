@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
 import ecooil_kmp.composeapp.generated.resources.ic_ai92
@@ -36,6 +37,7 @@ import org.example.data.CarResponse
 import org.example.networking.Constant
 import org.example.networking.Constant.isLoaded
 import org.example.networking.InsultCensorClient
+import org.example.project.AuthScreen
 import org.example.util.AppSettings
 import org.example.util.onError
 import org.example.util.onSuccess
@@ -53,6 +55,7 @@ fun SGScreenMain(client: InsultCensorClient?, viewModel: HomeViewModel) {
     val balanceText = viewModel.balanceText
     val statusText = viewModel.statusText
     val fuelItems2 = viewModel.fuelItems
+    val tokenError = viewModel.tokenError
 
     val state = rememberPullToRefreshState()
 
@@ -60,6 +63,15 @@ fun SGScreenMain(client: InsultCensorClient?, viewModel: HomeViewModel) {
         isRefreshing = isLoaded,
         onRefresh = { viewModel.refresh() }
     ) {
+
+        if (tokenError) {
+            AppSettings.clear()
+            val navigatorLogOut = LocalNavigator.currentOrThrow
+//            navigatorLogOut.parent?.popUntilRoot()
+//            navigatorLogOut.parent?.push(AuthScreen)
+            navigatorLogOut.parent?.replaceAll(AuthScreen)
+        }
+
         // Ваш UI
     _root_ide_package_.org.example.project.GradientBackground(showVersion = false) {
 
