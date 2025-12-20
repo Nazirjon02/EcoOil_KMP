@@ -59,6 +59,8 @@ kotlin {
           //  implementation("com.google.zxing:core:3.5.3")
             implementation(libs.qrose)
 
+            implementation(libs.accompanist.permissions)
+
 
 
         }

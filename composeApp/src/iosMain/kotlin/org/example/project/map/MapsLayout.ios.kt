@@ -2,40 +2,77 @@ package org.example.project.map
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitView
 import platform.CoreLocation.CLLocationCoordinate2DMake
 import platform.MapKit.MKCoordinateRegionMakeWithDistance
 import platform.MapKit.MKMapView
 import platform.MapKit.MKPointAnnotation
-import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.*
+import org.example.data.Location
+import platform.CoreLocation.*
+import platform.MapKit.*
+import platform.Foundation.*
+import platform.darwin.NSObject
 
-@OptIn(ExperimentalForeignApi::class, ExperimentalComposeUiApi::class)
 @Composable
-actual fun MapsLayout() {
+actual fun MapsLayout(
+    stations: List<Station>,
+    selectedStationState: SelectedStationState,
+    onMapReady: () -> Unit,
+    userLocation: Location?
+) {
     UIKitView(
         modifier = Modifier.fillMaxSize(),
         factory = {
-            val mapView = MKMapView().apply {
-                val singapore = CLLocationCoordinate2DMake(1.35, 103.87)
+            MKMapView().apply {
+                showsUserLocation = true // синяя точка + отслеживание
+                isZoomEnabled = true
+                isScrollEnabled = true
+                isRotateEnabled = true
 
-                val region = MKCoordinateRegionMakeWithDistance(
-                    centerCoordinate = singapore,
-                    latitudinalMeters = 50_000.0,
-                    longitudinalMeters = 50_000.0
-                )
+                // Центр на пользователе или на Ташкенте
+                val center = userLocation?.let {
+                    CLLocationCoordinate2DMake(it.latitude, it.longitude)
+                } ?: CLLocationCoordinate2DMake(41.311081, 69.240562)
 
+                val region = MKCoordinateRegionMakeWithDistance(center, 20_000.0, 20_000.0)
                 setRegion(region, animated = false)
 
-                val annotation = MKPointAnnotation().apply {
-                    setCoordinate(singapore)
+                // Добавляем аннотации (маркеры)
+                stations.forEach { station ->
+                    val annotation = MKPointAnnotation().apply {
+                        setCoordinate(CLLocationCoordinate2DMake(station.latitude, station.longitude))
+                        title = station.name
+                        subtitle = station.address ?: "Адрес не указан"
+                    }
+                    addAnnotation(annotation)
                 }
 
-                addAnnotation(annotation)
-            }
+                // Делегат для обработки кликов по маркерам
+                delegate = object : NSObject(), MKMapViewDelegateProtocol {
+                    override fun mapView(mapView: MKMapView, didSelectAnnotationView: MKAnnotationView) {
+                        val annotation = didSelectAnnotationView.annotation as? MKPointAnnotation
+                        val coord = annotation?.coordinate ?: return
 
-            mapView
+                        // Ищем станцию по координатам
+                        val clickedStation = stations.find {
+                            kotlin.math.abs(it.latitude - coord.latitude) < 0.0001 &&
+                                    kotlin.math.abs(it.longitude - coord.longitude) < 0.0001
+                        }
+
+                        clickedStation?.let {
+                            selectedStationState.station = it
+                            selectedStationState.showDialog = true
+                        }
+                    }
+                }
+
+                onMapReady()
+            }
+        },
+        update = { mapView ->
+            // Можно обновлять при изменении данных
         }
     )
 }
