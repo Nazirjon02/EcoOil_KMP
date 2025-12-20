@@ -61,9 +61,9 @@ object MainRootScreen : Screen {
                         )
 
                         NavigationBarItem(
-                            selected = tabNavigator.current == EmptyTab,
-                            onClick = { tabNavigator.current = EmptyTab },
-                            icon = { Icon(EmptyTab.options.icon!!, null,
+                            selected = tabNavigator.current == QrTab,
+                            onClick = { tabNavigator.current = QrTab },
+                            icon = { Icon(QrTab.options.icon!!, null,
                                 modifier = Modifier.size(24.dp)) },
                             label = { Text("QR") }
                         )
@@ -120,7 +120,7 @@ object HomeTab : Tab {
     }
 }
 
-object EmptyTab : Tab {
+object QrTab : Tab {
     override val options: TabOptions
         @Composable get() {
             val title = "Second"

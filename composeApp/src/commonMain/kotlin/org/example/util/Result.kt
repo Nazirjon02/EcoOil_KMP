@@ -29,10 +29,13 @@ inline fun <T, E: Error> Result<T, E>.onSuccess(action: (T) -> Unit): Result<T, 
 inline fun <T, E: Error> Result<T, E>.onError(action: (E) -> Unit): Result<T, E> {
     return when(this) {
         is Result.Error -> {
+            println("11111111111111111")
             action(error)
             this
         }
-        is Result.Success -> this
+        is Result.Success -> {
+            this
+        }
     }
 }
 

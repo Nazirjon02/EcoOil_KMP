@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -51,9 +53,11 @@ import org.example.networking.InsultCensorClient
 import org.example.networking.PhoneResponse
 import org.example.project.GradientBackground
 import org.example.project.MainRootScreen
+import org.example.project.SnackbarHostWrapper
 import org.example.project.ToastManager
 import org.example.project.Until
 import org.example.util.AppSettings
+import org.example.util.NetworkError
 import org.example.util.onError
 import org.example.util.onSuccess
 import org.jetbrains.compose.resources.painterResource
@@ -64,7 +68,14 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
     val snackbarHostState = remember { SnackbarHostState() }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // LaunchedEffect для показа snackbar сообщений
     LaunchedEffect(snackbarMessage) {
+        // Сначала скрываем клавиатуру
+        keyboardController?.hide()
+
+        // Теперь показываем snackbar
         snackbarMessage?.let {
             snackbarHostState.showSnackbar(it)
             snackbarMessage = null
@@ -294,10 +305,18 @@ fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
                                                         }
                                                     }
                                                 } else {
-                                                    ToastManager.show(body.message)
+                                                    snackbarMessage=body.message
+
                                                     isLoading = false
                                                 }
                                             }?.onError {
+                                                when (it){
+                                                    NetworkError.UNKNOWN,NetworkError.NO_INTERNET
+                                                    ->{
+                                                        snackbarMessage="Нет подключения к интернету"
+                                                    }
+                                                    else -> {}
+                                                }
                                                 // обработка ошибки
                                                 isLoading = false
                                             } ?: run {
@@ -321,7 +340,7 @@ fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
                                             isLoading = true
 
                                             if (phone.length != 4) {
-                                                ToastManager.show("Check SMS")
+                                                snackbarMessage="Проверьте СМС"
                                                 isLoading = false
                                                 return@launch
                                             }
@@ -343,16 +362,10 @@ fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
                                             result?.onSuccess { body ->
                                                 if (body.code == 1) {
                                                     body.data?.token?.let {
-                                                        AppSettings.putString(
-                                                            "token",
-                                                            it
-                                                        )
+                                                        AppSettings.putString("token", it)
                                                     }
                                                     body.data?.car_id?.let {
-                                                        AppSettings.putInt(
-                                                            "car_id",
-                                                            it
-                                                        )
+                                                        AppSettings.putInt("car_id",it)
                                                     }
                                                     navigator?.replace(MainRootScreen)
                                                 } else {
@@ -361,6 +374,13 @@ fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
                                                     isLoading = false
                                                 }
                                             }?.onError {
+                                                when (it){
+                                                    NetworkError.UNKNOWN,NetworkError.NO_INTERNET
+                                                        ->{
+                                                        snackbarMessage="Нет подключения к интернету"
+                                                    }
+                                                    else -> {}
+                                                }
                                                 isLoading = false
                                             } ?: run {
                                                 isLoading = false
@@ -404,12 +424,19 @@ fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
                                 }
                             }
                         }
+
                     }
 
                     Spacer(modifier = Modifier.height(100.dp))
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        modifier = Modifier.align(Alignment.CenterHorizontally) // Центрируем Snackbar
+                    )
                 }
             }
 
         }
+
+
     }
 }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.example.data.CarResponse
 import org.example.networking.Constant
+import org.example.networking.Constant.InvalidToken
 import org.example.networking.InsultCensorClient
 import org.example.project.Until
 import org.example.util.AppSettings
@@ -20,10 +21,15 @@ class QrViewModel(
     private val client: InsultCensorClient
 ) : ViewModel() {
 
-    var secondsLeft by mutableStateOf(0)  // стартуем с 0
+    var secondsLeft by mutableStateOf(180)  // стартуем с 0
         private set
 
     var qrValue by mutableStateOf("")
+        private set
+
+    var isError by mutableStateOf(false)
+        private set
+    var tokenError by mutableStateOf(false)
         private set
 
     var isRefreshing by mutableStateOf(false)
@@ -65,8 +71,16 @@ class QrViewModel(
             try {
                 requestQrData(
                     client = client,
-                    onSuccess = { /* обработка body */ },
-                    onError = { /* лог/ошибка */ }
+                    onSuccess = {
+                        if (it.message==InvalidToken) {
+                            tokenError = true
+                            return@requestQrData
+                        }
+                                },
+                    onError = { /* лог/ошибка */
+                        secondsLeft=0
+                    isError=true
+                    }
                 )
                 // Успешно — сбрасываем таймер и запускаем countdown
                 secondsLeft = 180
@@ -110,12 +124,9 @@ suspend fun requestQrData(
         )
 
         result?.onSuccess { body ->
-            if (body.code == 1) {
                 onSuccess(body)
-            } else {
-                onError(null)
-            }
         }?.onError { e ->
+            onError(null)
         } ?: run {
             onError(null)
         }

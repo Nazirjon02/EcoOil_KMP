@@ -35,10 +35,10 @@ import ecooil_kmp.composeapp.generated.resources.right_arrow
 import ecooil_kmp.composeapp.generated.resources.user
 import org.example.data.CarResponse
 import org.example.networking.Constant
-import org.example.networking.Constant.isLoaded
 import org.example.networking.InsultCensorClient
 import org.example.project.login.AuthScreen
 import org.example.util.AppSettings
+import org.example.util.NetworkError
 import org.example.util.onError
 import org.example.util.onSuccess
 import org.jetbrains.compose.resources.painterResource
@@ -59,18 +59,16 @@ fun SGScreenMain(
     val statusText = viewModel?.statusText ?: "SG"
     val fuelItems2 = viewModel?.fuelItems ?: emptyList() // или создай тестовые
     val tokenError = viewModel?.tokenError ?: false
-    val state = rememberPullToRefreshState()
+    val isRefresh = viewModel?.isRefreshMainScreen ?: false
 
     PullToRefreshBox(
-        isRefreshing = isLoaded,
+        isRefreshing = isRefresh,
         onRefresh = { viewModel?.refresh() }
     ) {
 
         if (tokenError) {
             AppSettings.clear()
             val navigatorLogOut = LocalNavigator.currentOrThrow
-//            navigatorLogOut.parent?.popUntilRoot()
-//            navigatorLogOut.parent?.push(AuthScreen)
             navigatorLogOut.parent?.replaceAll(AuthScreen)
         }
 
@@ -400,7 +398,7 @@ fun BalanceItem(label: String, amount: String, amountColor: Color) {
 suspend fun requestCarData(
     client: InsultCensorClient?,
     onSuccess: (CarResponse) -> Unit,
-    onError: (Throwable?) -> Unit
+    onError: (NetworkError?) -> Unit
 ) {
     try {
         val hash = org.example.project.Until.sha256(
@@ -423,19 +421,17 @@ suspend fun requestCarData(
         )
 
         result?.onSuccess { body ->
-            if (body.code == 1) {
                 onSuccess(body)
-            } else {
-                onError(null)
-            }
         }?.onError { e ->
+            onError(e)
         } ?: run {
             onError(null)
         }
     } catch (e: Throwable) {
-        onError(e)
+        onError(null)
     }
 }
+
 
 suspend fun getTransactions(
     client: InsultCensorClient?,
