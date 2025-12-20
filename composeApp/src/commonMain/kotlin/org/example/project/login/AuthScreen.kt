@@ -1,15 +1,16 @@
-package org.example.project
+package org.example.project.login
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.networking.createHttpClient
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import androidx.compose.runtime.*
-import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.LocalNavigator
+import org.example.project.MainRootScreen
+import org.example.project.PlatformHttpEngine
 import org.example.util.AppSettings
 
 object AuthScreen : Screen {
@@ -36,8 +37,9 @@ object AuthScreen : Screen {
                     baseUrl = Constant.baseUrl
                 )
             }
-            AppContent(client)
+            val navigator = LocalNavigator.currentOrThrow
+
+            AppContent(client, navigator)
         }
     }
 }
-

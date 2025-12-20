@@ -37,7 +37,7 @@ import org.example.data.CarResponse
 import org.example.networking.Constant
 import org.example.networking.Constant.isLoaded
 import org.example.networking.InsultCensorClient
-import org.example.project.AuthScreen
+import org.example.project.login.AuthScreen
 import org.example.util.AppSettings
 import org.example.util.onError
 import org.example.util.onSuccess
@@ -45,23 +45,25 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
-fun SGScreenMain(client: InsultCensorClient?, viewModel: HomeViewModel) {
+fun SGScreenMain(
+    client: InsultCensorClient? = null,
+    viewModel: HomeViewModel? = null  // ← сделай nullable и дай дефолт null
+) {
     val scroll = rememberScrollState()
     val navigator = LocalNavigator.current
 
-
-    val userName = viewModel.userName
-    val bonusText = viewModel.bonusText
-    val balanceText = viewModel.balanceText
-    val statusText = viewModel.statusText
-    val fuelItems2 = viewModel.fuelItems
-    val tokenError = viewModel.tokenError
-
+    // Безопасно берём значения, с fallback на заглушки для превью
+    val userName = viewModel?.userName ?: "User"
+    val bonusText = viewModel?.bonusText ?: "0"
+    val balanceText = viewModel?.balanceText ?: "0 смн"
+    val statusText = viewModel?.statusText ?: "SG"
+    val fuelItems2 = viewModel?.fuelItems ?: emptyList() // или создай тестовые
+    val tokenError = viewModel?.tokenError ?: false
     val state = rememberPullToRefreshState()
 
     PullToRefreshBox(
         isRefreshing = isLoaded,
-        onRefresh = { viewModel.refresh() }
+        onRefresh = { viewModel?.refresh() }
     ) {
 
         if (tokenError) {

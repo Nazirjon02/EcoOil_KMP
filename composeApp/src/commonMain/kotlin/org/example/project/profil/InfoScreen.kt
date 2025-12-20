@@ -22,7 +22,7 @@ import ecooil_kmp.composeapp.generated.resources.call
 import ecooil_kmp.composeapp.generated.resources.communication
 import ecooil_kmp.composeapp.generated.resources.home_info
 import ecooil_kmp.composeapp.generated.resources.right_arrow
-import org.example.project.AuthScreen
+import org.example.project.login.AuthScreen
 import org.example.util.AppSettings
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
