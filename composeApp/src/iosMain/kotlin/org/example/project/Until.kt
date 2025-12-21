@@ -6,8 +6,8 @@ import kotlinx.cinterop.usePinned
 import platform.CoreCrypto.CC_SHA256
 import platform.CoreCrypto.CC_SHA256_DIGEST_LENGTH
 import platform.UIKit.UIDevice
-import kotlin.experimental.and
-
+import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSince1970
 
 
 actual object Until {
@@ -35,11 +35,9 @@ actual object Until {
     actual fun getDeviceId(): String {
         return UIDevice.currentDevice.identifierForVendor?.UUIDString ?: "unknown"
     }
+
+    actual fun currentTimeMillis(): Long =
+        (NSDate().timeIntervalSince1970 * 1000.0).toLong()
 }
 
-actual object ToastManager {
-    actual fun show(message: String) {
-        // Здесь можно потом реализовать свой кастомный "тоаст" для iOS
-        println("Toast(iOS): $message")
-    }
-}
+

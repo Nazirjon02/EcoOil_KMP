@@ -48,13 +48,13 @@ object QrScreen : Screen {
 
         val qrPainter = rememberQrCodePainter(vm.qrValue)
         val isError = vm.isError
-        val isTokenInvalid = vm.tokenError
 
-        if (isTokenInvalid) {
-            AppSettings.clear()
-            val navigatorLogOut = LocalNavigator.currentOrThrow
-            navigatorLogOut.parent?.replaceAll(AuthScreen)
+        LaunchedEffect(vm.secondsLeft) {
+            if (vm.secondsLeft <= 0) {
+                vm.refreshIfNeeded() // или vm.refreshForce(), если сделаем принудительно
+            }
         }
+
         PullToRefreshBox(
             isRefreshing = vm.isRefreshing,
             onRefresh = { vm.refreshIfNeeded() }

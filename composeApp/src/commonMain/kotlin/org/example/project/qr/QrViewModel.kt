@@ -8,20 +8,16 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.example.data.CarResponse
-import org.example.networking.Constant
-import org.example.networking.Constant.InvalidToken
-import org.example.networking.InsultCensorClient
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toLocalDateTime
 import org.example.project.Until
+import org.example.project.Until.currentTimeMillis
 import org.example.util.AppSettings
-import org.example.util.onError
-import org.example.util.onSuccess
+import kotlin.time.ExperimentalTime
 
-class QrViewModel(
-    private val client: InsultCensorClient
-) : ViewModel() {
+class QrViewModel : ViewModel() {
 
-    var secondsLeft by mutableStateOf(180)  // стартуем с 0
+    var secondsLeft by mutableStateOf(180)
         private set
 
     var qrValue by mutableStateOf("")
@@ -29,22 +25,18 @@ class QrViewModel(
 
     var isError by mutableStateOf(false)
         private set
-    var tokenError by mutableStateOf(false)
-        private set
 
     var isRefreshing by mutableStateOf(false)
         private set
 
     private var countdownJob: Job? = null
 
-    // Проверяем и обновляем QR, если таймер истёк или QR пустой
     fun refreshIfNeeded() {
         if (secondsLeft <= 0 || qrValue.isEmpty()) {
             refreshNow()
         }
     }
 
-    // Запускаем таймер, если его нет (даже если secondsLeft == 0 — но после refresh будет 180)
     private fun startCountdown() {
         if (countdownJob?.isActive == true) return
 
@@ -53,7 +45,7 @@ class QrViewModel(
                 delay(1000)
                 secondsLeft--
             }
-            // Когда дошёл до 0 — Job сам завершается
+
         }
     }
 
@@ -61,76 +53,67 @@ class QrViewModel(
         if (isRefreshing) return
         isRefreshing = true
 
-        // 1) генерим QR
-        val carNumber = AppSettings.getString("car_number")
-        val carId = AppSettings.getInt("car_id")
-        qrValue = "$carNumber$carId"
-
-        // 2) дергаем сервер
         viewModelScope.launch {
             try {
-                requestQrData(
-                    client = client,
-                    onSuccess = {
-                        if (it.message==InvalidToken) {
-                            tokenError = true
-                            return@requestQrData
-                        }
-                                },
-                    onError = { /* лог/ошибка */
-                        secondsLeft=0
-                    isError=true
-                    }
-                )
-                // Успешно — сбрасываем таймер и запускаем countdown
+                val cardNumber = AppSettings.getString("card_number")
+                val carId = AppSettings.getInt("car_id")
+
+                // 1) добавляем timestamp
+                val ts = nowQrTimestampPlus3Min() // yyyy-MM-dd HH:mm:ss
+                println(ts)
+
+                // 2) считаем hash (sha256)
+                // Выбирай состав строки как тебе нужно. Я сделал: carId + token + ts + deviceId
+                val hashInput = ts
+                val hash = Until.sha256(hashInput)
+
+                // 3) формируем QR payload (строка)
+                // Можно поменять формат под твой сервер/сканер.
+                qrValue = cardNumber + "," + carId + "," + hash
+
+                // 4) состояние
+                isError = false
                 secondsLeft = 180
-                startCountdown()  // ← сразу запускаем таймер после обновления
+                startCountdown()
+            } catch (_: Throwable) {
+                // Если вдруг нет данных в AppSettings или ошибка sha
+                isError = true
+                secondsLeft = 0
+                qrValue = ""
             } finally {
                 isRefreshing = false
             }
         }
     }
 
-    // Вызываем из таба: сначала refresh (если нужно), потом гарантированно стартуем таймер
     fun ensureCountdownRunning() {
         refreshIfNeeded()
-        startCountdown()  // всегда запускаем (если уже есть — не дублирует)
+        startCountdown()
     }
 }
 
-suspend fun requestQrData(
-    client: InsultCensorClient?,
-    onSuccess: (CarResponse) -> Unit,
-    onError: (Throwable?) -> Unit
-) {
-    try {
-        val hash = Until.sha256(AppSettings.getInt("car_id").toString()
-                +AppSettings.getString("token")
-                + 0
-                + Until.getDeviceId()
-        )
 
-        val map = hashMapOf(
-            "Token" to AppSettings.getString("token"),
-            "DeviceId" to Until.getDeviceId(),
-            "CarId" to AppSettings.getInt("car_id").toString(),
-            "Limit" to 0,
-            "Hash" to hash
-        )
 
-        val result = client?.request<CarResponse>(
-            path = Constant.getQr,
-            params = map,
-        )
 
-        result?.onSuccess { body ->
-                onSuccess(body)
-        }?.onError { e ->
-            onError(null)
-        } ?: run {
-            onError(null)
-        }
-    } catch (e: Throwable) {
-        onError(e)
+@OptIn(ExperimentalTime::class, ExperimentalTime::class)
+fun nowQrTimestampPlus3Min(): String {
+    val plus3MinMillis = currentTimeMillis() + 3L * 60L * 1000L
+
+    val dt = Instant
+        .fromEpochMilliseconds(plus3MinMillis)
+        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+
+    return buildString {
+        append(dt.year.toString().padStart(4, '0'))
+        append("-")
+        append(dt.monthNumber.toString().padStart(2, '0'))
+        append("-")
+        append(dt.dayOfMonth.toString().padStart(2, '0'))
+        append(" ")
+        append(dt.hour.toString().padStart(2, '0'))
+        append(":")
+        append(dt.minute.toString().padStart(2, '0'))
+        append(":")
+        append(dt.second.toString().padStart(2, '0'))
     }
 }

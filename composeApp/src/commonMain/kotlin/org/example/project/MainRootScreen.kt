@@ -50,7 +50,7 @@ object MainRootScreen : Screen {
         }
 
         val qrViewModel = remember {
-            QrViewModel(client)
+            QrViewModel()
         }
 
 

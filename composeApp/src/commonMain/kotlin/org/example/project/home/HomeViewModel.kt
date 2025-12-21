@@ -123,6 +123,7 @@ class HomeViewModel(
                     // Сохраняем данные в AppSettings
                     AppSettings.putString("car_name", body.data?.car_data?.car_name.toString())
                     AppSettings.putString("car_number", body.data?.car_data?.car_number.toString())
+                    AppSettings.putString("card_number", body.data?.car_data?.card_number.toString())
                     AppSettings.putString("car_pip_size", body.data?.car_data?.car_pip_size.toString())
                     AppSettings.putString("car_balance_size", body.data?.car_data?.car_balance_size.toString())
                     AppSettings.putString("car_phone_number", body.data?.car_data?.car_phone_number.toString())
