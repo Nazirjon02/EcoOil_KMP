@@ -11,72 +11,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import org.example.data.ApiResponse
-import org.example.data.FuelPrice
 import org.example.data.Location
-import org.example.data.StationsResponse
-
-object MapScreen : Screen {
-    @Composable
-    override fun Content() {
-        // Тестовые станции — вытащили из твоего testResponse
-        val testStations = listOf(
-            Station(
-                id = 1,
-                name = "EcoOil Ташкент",
-                address = "ул. Амира Темура, 45",
-                latitude = 41.311081,
-                longitude = 69.240562,
-                distance = 2.5,
-                is_open = true,
-                rating = 4.5f,
-                fuel_prices = listOf(
-                    FuelPrice("ai92", 11500.0),
-                    FuelPrice("ai95", 12500.0),
-                    FuelPrice("diesel", 11000.0)
-                )
-            ),
-            Station(
-                id = 2,
-                name = "EcoOil Чиланзар",
-                address = "ул. Чиланзар, 12",
-                latitude = 41.288056,
-                longitude = 69.204722,
-                distance = 5.7,
-                is_open = true,
-                rating = 4.2f,
-                fuel_prices = listOf(
-                    FuelPrice("ai92", 11600.0),
-                    FuelPrice("ai95", 12600.0)
-                )
-            ),
-            Station(
-                id = 3,
-                name = "EcoOil Юнусабад",
-                address = "ул. Шахрисабз, 23",
-                latitude = 41.335000,
-                longitude = 69.280000,
-                distance = 8.2,
-                is_open = false,
-                rating = 4.8f,
-                fuel_prices = listOf(
-                    FuelPrice("ai92", 11400.0),
-                    FuelPrice("ai95", 12400.0),
-                    FuelPrice("diesel", 10900.0),
-                    FuelPrice("gas", 8500.0)
-                )
-            )
-        )
-
-        MapScreen(stations = testStations) // передаём в наш composable
-    }
-}
-
+import org.example.data.MapStation
+import org.example.data.SelectedStationState
 
 @Composable
 fun MapScreen(
-    stations: List<Station>,
+    stations: List<MapStation>,
     userLocation: Location? = null
 ) {
     val selectedStationState = remember { SelectedStationState() }
@@ -87,7 +28,6 @@ fun MapScreen(
         userLocation = userLocation
     )
 
-    // Диалог с информацией о станции
     selectedStationState.station?.let { station ->
         if (selectedStationState.showDialog) {
             AlertDialog(
@@ -95,30 +35,46 @@ fun MapScreen(
                 title = { Text(station.name) },
                 text = {
                     Column {
-                        Text("Адрес: ${station.address ?: "Не указан"}")
-                        Text("Статус: ${if (station.is_open) "Открыто" else "Закрыто"}")
-                        Text("Рейтинг: ${station.rating}")
-                        Text("Расстояние: ${station.distance?.formatOneDecimal() ?: "—"}")
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Адрес: ${station.snippet.ifBlank { "Не указан" }}")
 
+                        Spacer(Modifier.height(8.dp))
+                        Text("Услуги:", fontWeight = FontWeight.Bold)
+                        Text("Магазин: ${if (station.hasShop) "Да" else "Нет"}")
+                        Text("Круглосуточно: ${if (station.workAroundTime) "Да" else "Нет"}")
+                        Text("Кофе: ${if (station.hasCoffee) "Да" else "Нет"}")
+                        Text("Туалет: ${if (station.hasToilet) "Да" else "Нет"}")
+                        Text("Терминал оплаты: ${if (station.hasPayTerminal) "Да" else "Нет"}")
+
+                        Spacer(Modifier.height(12.dp))
                         Text("Цены на топливо:", fontWeight = FontWeight.Bold)
-                        station.fuel_prices.forEach { price ->
-                            Text("${price.fuel_type.uppercase()}: ${price.price} ${price.currency}")
+
+                        if (station.prices.isEmpty()) {
+                            Text("Нет данных")
+                        } else {
+                            station.prices.forEach { p ->
+                                Text("${p.label}: ${p.price} ${p.currency}")
+                            }
                         }
                     }
                 },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            val to = Location(station.latitude, station.longitude)
+                            RouteNavigator.openRoute(
+                                from = userLocation, // если null -> откроется просто точка
+                                to = to,
+                                title = station.name
+                            )
+                        }
+                    ) { Text("Маршрут") }
+                },
                 confirmButton = {
                     TextButton(onClick = { selectedStationState.showDialog = false }) {
-                        Text("OK")
+                        Text("Закрыть")
                     }
                 }
             )
         }
     }
-}
-
-
-fun Double.formatOneDecimal(): String {
-    val rounded = kotlin.math.round(this * 10) / 10
-    return "$rounded км"
 }

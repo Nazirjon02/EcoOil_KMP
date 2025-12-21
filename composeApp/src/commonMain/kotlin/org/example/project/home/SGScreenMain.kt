@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ import org.example.data.CarResponse
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.project.login.AuthScreen
+import org.example.project.until.ShimmerEffect
 import org.example.util.AppSettings
 import org.example.util.NetworkError
 import org.example.util.onError
@@ -166,6 +168,7 @@ fun SGScreenMain(
                             painter = painterResource(Res.drawable.icon_dt),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
+
                         )
                     }
                 }
@@ -440,9 +443,10 @@ suspend fun getTransactions(
 ) {
     try {
         val hash = org.example.project.Until.sha256(
-            org.example.project.Until.getDeviceId() +
+            AppSettings.getInt("car_id").toString()+
                     AppSettings.getString("token") +
-                    AppSettings.getInt("car_id")
+                    org.example.project.Until.getDeviceId()
+
         )
 
         val map = hashMapOf(
@@ -454,7 +458,7 @@ suspend fun getTransactions(
         )
 
         val result = client?.request<CarResponse>(
-            path = Constant.getTransactions,
+            path = Constant.getMap,
             params = map,
         )
 

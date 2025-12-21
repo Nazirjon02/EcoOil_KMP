@@ -1,71 +1,94 @@
 package org.example.project.map
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import platform.CoreLocation.CLLocationCoordinate2DMake
-import platform.MapKit.MKCoordinateRegionMakeWithDistance
-import platform.MapKit.MKMapView
-import platform.MapKit.MKPointAnnotation
-import kotlinx.cinterop.*
-import org.example.data.Location
-import platform.MapKit.*
-import platform.darwin.NSObject
 import androidx.compose.ui.interop.UIKitView
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
+import org.example.data.Location
+import org.example.data.MapStation
+import org.example.data.SelectedStationState
+import platform.CoreLocation.CLLocationCoordinate2DMake
+import platform.Foundation.NSURL
+import platform.MapKit.*
+import platform.UIKit.UIApplication
+import platform.darwin.NSObject
 import kotlin.math.abs
 
-@OptIn(ExperimentalForeignApi::class) // Обязательно добавь это!
+@OptIn(ExperimentalForeignApi::class)
+private fun khujandCoord() = CLLocationCoordinate2DMake(40.2833, 69.6167)
+
+@OptIn(ExperimentalForeignApi::class)
 @Composable
 actual fun MapsLayout(
-    stations: List<Station>,
+    stations: List<MapStation>,
     selectedStationState: SelectedStationState,
     onMapReady: () -> Unit,
     userLocation: Location?
 ) {
+    // локально получаем гео на iOS (если userLocation не прокидываешь сверху)
+    var myLocation by remember { mutableStateOf<Location?>(null) }
+    val locManager = remember { IosLocationManager() }
+
+    LaunchedEffect(Unit) {
+        locManager.onLocation = { lat, lng ->
+            myLocation = Location(lat, lng)
+        }
+        locManager.requestPermissionAndStart()
+    }
+
+    val effectiveLocation = myLocation ?: userLocation
+
     UIKitView(
         modifier = Modifier.fillMaxSize(),
-        interactive = true, // важно для жестов
+        interactive = true,
         factory = {
             MKMapView().apply {
-                // Правильные setter'ы вместо прямого присваивания
                 setZoomEnabled(true)
                 setScrollEnabled(true)
                 setRotateEnabled(true)
-                setPitchEnabled(true) // опционально — наклон карты
-                showsUserLocation = true // синяя точка и отслеживание
+                setPitchEnabled(true)
 
-                // Центрируем на пользователе или на Ташкенте
-                val centerCoord = userLocation?.let {
+                showsUserLocation = true
+
+                // старт: userLocation если есть, иначе Худжанд
+                val center = effectiveLocation?.let {
                     CLLocationCoordinate2DMake(it.latitude, it.longitude)
-                } ?: CLLocationCoordinate2DMake(41.311081, 69.240562)
+                } ?: khujandCoord()
 
-                val region = MKCoordinateRegionMakeWithDistance(centerCoord, 20_000.0, 20_000.0)
-                setRegion(region, animated = false)
+                setRegion(
+                    MKCoordinateRegionMakeWithDistance(center, 20_000.0, 20_000.0),
+                    animated = false
+                )
 
-                // Добавляем маркеры
-                stations.forEach { station ->
-                    val annotation = MKPointAnnotation().apply {
-                        setCoordinate(CLLocationCoordinate2DMake(station.latitude, station.longitude))
-                        setTitle(station.name)
-                        setSubtitle(station.address ?: "Адрес не указан")
+                // маркеры
+                stations.forEach { st ->
+                    val a = MKPointAnnotation().apply {
+                        setCoordinate(CLLocationCoordinate2DMake(st.latitude, st.longitude))
+                        setTitle(st.name)
+                        setSubtitle(st.snippet)
                     }
-                    addAnnotation(annotation)
+                    addAnnotation(a)
                 }
 
-                // Делегат для кликов по маркерам
                 delegate = object : NSObject(), MKMapViewDelegateProtocol {
+
                     override fun mapView(mapView: MKMapView, didSelectAnnotationView: MKAnnotationView) {
-                        val annotation = didSelectAnnotationView.annotation as? MKPointAnnotation
-                        val coord = annotation?.coordinate ?: return
+                        val ann = didSelectAnnotationView.annotation ?: return
 
-                        // Правильный доступ к полям структуры через useContents
+                        // Игнорируем клик по синей точке пользователя
+                        if (ann is MKUserLocation) return
+
+                        val point = ann as? MKPointAnnotation ?: return
+                        val coord = point.coordinate
+
                         coord.useContents {
-                            val clickedStation = stations.find { station ->
-                                abs(station.latitude - this.latitude) < 0.0001 &&
-                                        abs(station.longitude - this.longitude) < 0.0001
+                            val clicked = stations.find { st ->
+                                abs(st.latitude - this.latitude) < 0.00001 &&
+                                        abs(st.longitude - this.longitude) < 0.00001
                             }
-
-                            clickedStation?.let {
+                            clicked?.let {
                                 selectedStationState.station = it
                                 selectedStationState.showDialog = true
                             }
@@ -77,8 +100,42 @@ actual fun MapsLayout(
             }
         },
         update = { mapView ->
-            // Здесь можно обновлять регион или аннотации при изменении stations/userLocation
-            // Но для простоты пока оставляем пустым
+            // обновляем центр когда получили user location
+            val center = effectiveLocation?.let {
+                CLLocationCoordinate2DMake(it.latitude, it.longitude)
+            } ?: khujandCoord()
+
+            mapView.setRegion(
+                MKCoordinateRegionMakeWithDistance(center, 20_000.0, 20_000.0),
+                animated = true
+            )// перерисуем аннотации без дублей (кроме user location)
+            val anns = mapView.annotations ?: emptyList<Any>()
+            val toRemove = anns.filterNot { it is MKUserLocation }
+            mapView.removeAnnotations(toRemove)
+
+            stations.forEach { st ->
+                val a = MKPointAnnotation().apply {
+                    setCoordinate(CLLocationCoordinate2DMake(st.latitude, st.longitude))
+                    setTitle(st.name)
+                    setSubtitle(st.snippet)
+                }
+                mapView.addAnnotation(a)
+            }
         }
     )
+}
+
+
+
+actual object RouteNavigator {
+    actual fun openRoute(from: Location?, to: Location, title: String?) {
+        val urlString = if (from != null) {
+            "http://maps.apple.com/?saddr=${from.latitude},${from.longitude}&daddr=${to.latitude},${to.longitude}"
+        } else {
+            "http://maps.apple.com/?ll=${to.latitude},${to.longitude}&q=${(title ?: "Точка").replace(" ", "+")}"
+        }
+
+        val url = NSURL.URLWithString(urlString) ?: return
+        UIApplication.sharedApplication.openURL(url)
+    }
 }

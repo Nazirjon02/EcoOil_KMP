@@ -70,6 +70,10 @@ object AppSettings {
     fun putDouble(key: String, value: Double) = settings.putDouble(key, value)
     fun getDouble(key: String, default: Double = 0.0): Double = settings.getDouble(key, default)
 
+    fun putLong(key: String, value: Long) = settings.putLong(key, value)
+    fun getLong(key: String, value: Long) = settings.getLong(key, value)
+
+
     // clear и remove — просто прокидываем (в реальном Settings они suspend, но мы вызываем в suspend контексте если нужно)
     fun clear() = settings.clear()
 

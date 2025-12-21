@@ -4,49 +4,65 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.serialization.Serializable
-
 @Serializable
-data class ApiResponse<T>(
+data class ResponseMap(
     val code: Int,
     val message: String,
-    val data: T
+    val data: Data
 )
-
 @Serializable
-data class StationsResponse(
+data class Data(
     val station_count: Int,
     val list_station_map: List<Station>
 )
-
 @Serializable
 data class Station(
-    val id: Long,
-    val name: String,
-    val address: String? = null,
-    val latitude: Double,
-    val longitude: Double,
-    val distance: Double? = null,
-    val is_open: Boolean = true,
-    val rating: Float = 0f,
-    val fuel_prices: List<FuelPrice> = emptyList()
+    val station_name: String,
+    val station_snippet: String,
+    val station_latitude: String,
+    val station_longitude: String,
+    val station_shop: Int,
+    val station_work_around_time: Int,
+    val station_coffee: Int,
+    val station_toilet: Int,
+    val station_pay_terminal: Int,
+    val ai95_price: String?,
+    val ai92_price: String?,
+    val dt_price: String?,
+    val gas_price: String?,
+    val dtecto_price: String?
 )
-
-@Serializable
-data class FuelPrice(
-    val fuel_type: String,
-    val price: Double,
-    val currency: String = "TJS"
-)
-
-// Общий класс для координат
 @Serializable
 data class Location(
     val latitude: Double,
     val longitude: Double
 )
 
-// Состояние для выбранной станции
+@Serializable
+data class MapFuelPrice(
+    val key: String,          // "ai95", "ai92", ...
+    val label: String,        // "АИ-95", ...
+    val price: String,        // строкой, как в API (или форматированная)
+    val currency: String = "TJS"
+)
+
+@Serializable
+data class MapStation(
+    val name: String,
+    val snippet: String,
+    val latitude: Double,
+    val longitude: Double,
+
+    val hasShop: Boolean,
+    val workAroundTime: Boolean,
+    val hasCoffee: Boolean,
+    val hasToilet: Boolean,
+    val hasPayTerminal: Boolean,
+
+    val prices: List<MapFuelPrice>
+)
+
 class SelectedStationState {
-    var station: Station? by mutableStateOf(null)
-    var showDialog by mutableStateOf(false)
+    var station: MapStation? by mutableStateOf(null)
+    var showDialog: Boolean by mutableStateOf(false)
 }

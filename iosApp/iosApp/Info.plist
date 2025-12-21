@@ -5,11 +5,16 @@
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
 
-        <!-- 🔥 Разрешаем HTTP-запросы (NSAllowsArbitraryLoads = true) -->
+        <!-- 🔥 Разрешаем HTTP-запросы -->
         <key>NSAppTransportSecurity</key>
         <dict>
             <key>NSAllowsArbitraryLoads</key>
             <true/>
         </dict>
+
+        <!-- 📍 Геолокация (ОБЯЗАТЕЛЬНО) -->
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>AIzaSyBk7RI60cMI0gkuh_q8Mr63eSy_CtUM-qg</string>
+
     </dict>
 </plist>

@@ -60,9 +60,6 @@ kotlin {
             implementation(libs.qrose)
 
             implementation(libs.accompanist.permissions)
-
-
-
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)

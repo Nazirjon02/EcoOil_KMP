@@ -1,6 +1,7 @@
 package org.example.project
 
 import android.app.Application
+import android.content.Context
 
 class App : Application() {
     override fun onCreate() {
@@ -9,3 +10,5 @@ class App : Application() {
         ToastManager.init(this)
     }
 }
+
+

@@ -91,6 +91,11 @@ class HomeViewModel(
         isRefreshMainScreen = true
 
         viewModelScope.launch {
+            getTransactions(
+                client = client,
+                onSuccess = {},
+                onError = {}
+            )
             requestCarData(
                 client = client,
                 onSuccess = { body ->

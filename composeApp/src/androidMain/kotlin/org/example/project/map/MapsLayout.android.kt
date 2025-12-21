@@ -1,104 +1,135 @@
 package org.example.project.map
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberCameraPositionState
-
-
 import androidx.compose.runtime.*
-import com.google.maps.android.compose.*
-import org.example.data.Location
-
+import androidx.compose.ui.Modifier
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import io.ktor.websocket.Frame
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.*
+import org.example.data.Location
+import org.example.data.MapStation
+import org.example.data.SelectedStationState
+import androidx.core.net.toUri
+import org.example.project.appContext
+
+private val KHUJAND = LatLng(40.2833, 69.6167)
+private const val ZOOM_CITY = 12f
+private const val ZOOM_ME = 15f
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 actual fun MapsLayout(
-    stations: List<Station>,
+    stations: List<MapStation>,
     selectedStationState: SelectedStationState,
     onMapReady: () -> Unit,
     userLocation: Location?
 ) {
-    val locationPermissionsState = rememberMultiplePermissionsState(
+    val permissionsState = rememberMultiplePermissionsState(
         listOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
 
-    val initialPosition = userLocation?.let {
-        LatLng(it.latitude, it.longitude)
-    } ?: LatLng(41.311081, 69.240562) // Ташкент по умолчанию
+    // Центр: пользователь если есть, иначе Худжанд
+    val target = userLocation?.let { LatLng(it.latitude, it.longitude) } ?: KHUJAND
+    val zoom = if (userLocation != null) ZOOM_ME else ZOOM_CITY
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(initialPosition, 12f)
+        position = CameraPosition.fromLatLngZoom(target, zoom)
     }
 
-    var mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = false)) }
+    // Флаг "карта загружена"
+    var mapLoaded by remember { mutableStateOf(false) }
 
-    // Если разрешения уже есть — включаем геолокацию
-    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
-        if (locationPermissionsState.allPermissionsGranted) {
-            mapProperties = mapProperties.copy(isMyLocationEnabled = true)
-        }
+    // Меняем позицию только после загрузки карты (без CameraUpdateFactory)
+    LaunchedEffect(mapLoaded, userLocation?.latitude, userLocation?.longitude) {
+        if (!mapLoaded) return@LaunchedEffect
+
+        val t = userLocation?.let { LatLng(it.latitude, it.longitude) } ?: KHUJAND
+        val z = if (userLocation != null) ZOOM_ME else ZOOM_CITY
+
+        cameraPositionState.position = CameraPosition.fromLatLngZoom(t, z)
     }
 
     GoogleMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
-        properties = mapProperties,
-        onMapLoaded = onMapReady
+        properties = MapProperties(
+            isMyLocationEnabled = permissionsState.allPermissionsGranted
+        ),
+        uiSettings = MapUiSettings(
+            myLocationButtonEnabled = true,
+            zoomControlsEnabled = false
+        ),
+        onMapLoaded = {
+            mapLoaded = true
+            onMapReady()
+        }
     ) {
-        // Твои маркеры станций (как было раньше)
         stations.forEach { station ->
             val position = LatLng(station.latitude, station.longitude)
             Marker(
                 state = rememberMarkerState(position = position),
                 title = station.name,
-                snippet = station.address ?: "Адрес не указан",
+                snippet = station.snippet,
                 onClick = {
                     selectedStationState.station = station
                     selectedStationState.showDialog = true
-                    false
+                    true
                 }
             )
         }
     }
 
-    // UI для запроса разрешения
-    if (!locationPermissionsState.allPermissionsGranted) {
-        if (locationPermissionsState.shouldShowRationale) {
-            // Пользователь ранее отказал — объясни зачем нужно
+    // Запрос разрешений (как у тебя, но исправлено Text)
+    if (!permissionsState.allPermissionsGranted) {
+        if (permissionsState.shouldShowRationale) {
             AlertDialog(
                 onDismissRequest = { },
-                title = { Frame.Text("Нужна геолокация") },
-                text = { Frame.Text("Чтобы показать ваше местоположение на карте и ближайшие заправки, разрешите доступ к геолокации.") },
+                title = { Text("Нужна геолокация") },
+                text = { Text("Чтобы показать ваше местоположение на карте и ближайшие АЗС, разрешите доступ к геолокации.") },
                 confirmButton = {
-                    TextButton(onClick = { locationPermissionsState.launchMultiplePermissionRequest() }) {
+                    TextButton(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
                         Text("Разрешить")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { /* можно закрыть или оставить карту без гео */ }) {
-                        Text("Отказать")
-                    }
+                    TextButton(onClick = { }) { Text("Отказать") }
                 }
             )
         } else {
-            // Первый запрос
             LaunchedEffect(Unit) {
-                locationPermissionsState.launchMultiplePermissionRequest()
+                permissionsState.launchMultiplePermissionRequest()
             }
         }
+    }
+}
+
+
+actual object RouteNavigator {
+    actual fun openRoute(from: Location?, to: Location, title: String?) {
+        val uri = if (from != null) {
+            ("https://www.google.com/maps/dir/?api=1" +
+                    "&origin=${from.latitude},${from.longitude}" +
+                    "&destination=${to.latitude},${to.longitude}").toUri()
+        } else {
+            Uri.parse("geo:${to.latitude},${to.longitude}?q=${to.latitude},${to.longitude}(${Uri.encode(title ?: "Точка")})")
+        }
+
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        // Вариант 1: если у тебя есть глобальный appContext
+        appContext.startActivity(intent)
     }
 }
