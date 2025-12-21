@@ -60,6 +60,8 @@ kotlin {
             implementation(libs.qrose)
 
             implementation(libs.accompanist.permissions)
+
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
