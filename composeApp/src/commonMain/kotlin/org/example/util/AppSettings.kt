@@ -1,6 +1,10 @@
 package org.example.util
 
 import com.russhwolf.settings.Settings
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import org.example.data.TransactionDto
+import org.example.data.TransactionsCache
 
 object AppSettings {
 
@@ -104,4 +108,27 @@ object AppSettings {
     } catch (e: Throwable) {
         default
     }
+
+    private const val KEY_TX_CACHE = "tx_cache_v1"
+
+    private val JsonRelaxed = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+
+    fun saveTransactionsToCache(items: List<TransactionDto>) {
+        val json = JsonRelaxed.encodeToString(TransactionsCache(items))
+        AppSettings.putString(KEY_TX_CACHE, json)
+    }
+
+    fun loadTransactionsFromCache(): List<TransactionDto> {
+        val json = AppSettings.getString(KEY_TX_CACHE, "")
+        if (json.isBlank()) return emptyList()
+        return try {
+            JsonRelaxed.decodeFromString<TransactionsCache>(json).items
+        } catch (_: Throwable) {
+            emptyList()
+        }
+    }
 }
+

@@ -34,9 +34,13 @@ import ecooil_kmp.composeapp.generated.resources.icon_dt
 import ecooil_kmp.composeapp.generated.resources.notification
 import ecooil_kmp.composeapp.generated.resources.right_arrow
 import ecooil_kmp.composeapp.generated.resources.user
+import org.example.data.ApiCallResult
 import org.example.data.CarResponse
+import org.example.data.TransactionsResponse
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
+import org.example.project.history.TransactionsScreen
+import org.example.project.history.TransactionsScreenParent
 import org.example.project.login.AuthScreen
 import org.example.project.until.ShimmerEffect
 import org.example.util.AppSettings
@@ -221,99 +225,40 @@ fun SGScreenMain(
 
             Spacer(Modifier.height(24.dp))
 
-            // ---- ИСТОРИЯ ----
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "История", fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(16.dp, 0.dp)
-                )
-                Icon(
-                    painter = painterResource(Res.drawable.right_arrow),
-                    contentDescription = null,
-                    modifier = Modifier.height(30.dp)
-                        .padding(end = 16.dp, top = 5.dp, bottom = 5.dp, start = 0.dp)
-                )
-            }
+//            // ---- ИСТОРИЯ ----
+//            Row(
+//                Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Text(
+//                    "История", fontSize = 16.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    modifier = Modifier.padding(16.dp, 0.dp)
+//                )
+//                Icon(
+//                    painter = painterResource(Res.drawable.right_arrow),
+//                    contentDescription = null,
+//                    modifier = Modifier.height(30.dp)
+//                        .padding(end = 16.dp, top = 5.dp, bottom = 5.dp, start = 0.dp)
+//                )
+//            }
 
             Spacer(Modifier.height(12.dp))
 
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 20.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(Color.White),
-                elevation = CardDefaults.cardElevation(8.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    repeat(4) {
-                        Card(
-                            Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            elevation = CardDefaults.cardElevation(4.dp)
-                        ) {
 
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+            val navigator = LocalNavigator.current
 
-                                ) {
-
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-
-                                    Card(
-                                        shape = RoundedCornerShape(50),
-                                        colors = CardDefaults.cardColors(Color(0xFFE3F2FD))
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.ic_ai92),
-                                            contentDescription = null,
-                                            tint = Color(0xFF1E88E5),
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .padding(2.dp)
-                                        )
-                                    }
-
-                                    Spacer(Modifier.width(16.dp))
-
-                                    Column {
-                                        Text(
-                                            "Зачислено",
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        Text(
-                                            "АИ-92 33,02л",
-                                            fontSize = 13.sp,
-                                            color = Color.Gray
-                                        )
-                                    }
-                                }
-
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text(
-                                        "+9,91 смн",
-                                        fontSize = 16.sp,
-                                        color = Color(0xFF2E7D32)
-                                    )
-                                    Text(
-                                        "18.03.2025 16:02:14",
-                                        fontSize = 13.sp,
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
+            LastTransactionsCard(
+                transactions = viewModel!!.transactions,
+                onOpenTransactions = {
+                    navigator?.parent?.push(TransactionsScreenParent())
+                },
+                onOpenTransactionDetails = { tx ->
+                    navigator?.parent?.push(TransactionDetailsScreen(tx))
                 }
-            }
+            )
+
         }
     }
     }
@@ -432,47 +377,5 @@ suspend fun requestCarData(
         }
     } catch (e: Throwable) {
         onError(null)
-    }
-}
-
-
-suspend fun getTransactions(
-    client: InsultCensorClient?,
-    onSuccess: (CarResponse) -> Unit,
-    onError: (Throwable?) -> Unit
-) {
-    try {
-        val hash = org.example.project.Until.sha256(
-            AppSettings.getInt("car_id").toString()+
-                    AppSettings.getString("token") +
-                    org.example.project.Until.getDeviceId()
-
-        )
-
-        val map = hashMapOf(
-            "Token" to AppSettings.getString("token"),
-            "DeviceId" to org.example.project.Until.getDeviceId(),
-            "CarId" to AppSettings.getInt("car_id").toString(),
-            "Limit" to 0,
-            "Hash" to hash
-        )
-
-        val result = client?.request<CarResponse>(
-            path = Constant.getMap,
-            params = map,
-        )
-
-        result?.onSuccess { body ->
-            if (body.code == 1) {
-                onSuccess(body)
-            } else {
-                onError(null)
-            }
-        }?.onError { e ->
-        } ?: run {
-            onError(null)
-        }
-    } catch (e: Throwable) {
-        onError(e)
     }
 }

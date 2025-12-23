@@ -14,20 +14,26 @@ import ecooil_kmp.composeapp.generated.resources.ic_gas
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.example.data.ApiCallResult
 import org.example.data.FuelItem
 import org.example.data.FuelItemCache
 import org.example.data.FuelType
 import org.example.data.HomeCache
+import org.example.data.TransactionDto
 import org.example.data.icon
 import org.example.data.title
 import org.example.networking.Constant.InvalidToken
 import org.example.networking.InsultCensorClient
+import org.example.project.history.getTransactions
 import org.example.util.AppSettings
+import org.example.util.AppSettings.loadTransactionsFromCache
+import org.example.util.AppSettings.saveTransactionsToCache
 import org.example.util.NetworkError
 class HomeViewModel(
     private val client: InsultCensorClient?
 ) : ViewModel() {
-
+    var transactions by mutableStateOf<List<TransactionDto>>(emptyList())
+        private set
     var userName by mutableStateOf("Test")
         private set
 
@@ -56,6 +62,7 @@ class HomeViewModel(
 
     init {
         loadDataFromSettings()
+        transactions = loadTransactionsFromCache().take(4)
 
         // Если это первый запуск, делаем запрос на сервер
         if (isFirstLaunch) {
@@ -91,11 +98,21 @@ class HomeViewModel(
         isRefreshMainScreen = true
 
         viewModelScope.launch {
-            getTransactions(
-                client = client,
-                onSuccess = {},
-                onError = {}
-            )
+            val txResult = getTransactions(client,4)
+
+            when (txResult) {
+                is ApiCallResult.Success -> {
+                    val items = txResult.body.data.listTransaction
+                        .take(4) // гарантируем 4
+                    transactions = items
+                    saveTransactionsToCache(items)
+                }
+                is ApiCallResult.Failure -> {
+                    // если сеть упала — оставляем кеш (уже загружен в init)
+                    // при желании можешь показать toast
+                }
+            }
+
             requestCarData(
                 client = client,
                 onSuccess = { body ->
