@@ -13,72 +13,89 @@ import androidx.lifecycle.viewModelScope
 import cafe.adriel.voyager.navigator.LocalNavigator
 import kotlinx.coroutines.launch
 import org.example.data.ApiCallResult
+import org.example.data.CarResponse
 import org.example.data.TransactionDto
-import org.example.data.dateNoSeconds
-import org.example.data.dateOnly
+import org.example.data.TransactionsResponse
+
+import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
 import org.example.project.home.TransactionRow
+import org.example.util.AppSettings
+import org.example.util.NetworkError
+import org.example.util.onError
+import org.example.util.onSuccess
 
 class TransactionsViewModel : ViewModel() {
     private val _transactions = mutableStateListOf<TransactionDto>()
     val transactions: List<TransactionDto> get() = _transactions
+    var allLoaded = mutableStateOf(false)
+
 
     private var currentLimit = 15
     var isLoading = mutableStateOf(false)
 
     // Функция для загрузки данных
     fun loadTransactions(client: InsultCensorClient?) {
-        if (isLoading.value) return  // Если данные уже загружаются, не делать новый запрос
+        if (isLoading.value || allLoaded.value) return
 
         isLoading.value = true
         viewModelScope.launch {
-            val result = getTransactions(client, currentLimit)
-            when (result) {
-                is ApiCallResult.Success -> {
-                    _transactions.addAll(result.body.data.listTransaction ?: emptyList())
+            getTransactionsData(
+                client = client,
+                limit = currentLimit,
+                onSuccess = { body ->
+                    _transactions.addAll(body.data.listTransaction)
+                    if (body.data.listTransaction.size < 15) allLoaded.value = true
                     currentLimit += 15  // Увеличиваем лимит на 15 для следующего запроса
+                },
+                onError = {
+
+                },
+            )
+
+                    isLoading.value = false
                 }
-                is ApiCallResult.Failure -> {
-                    // Обработать ошибку, если необходимо
-                }
-            }
-            isLoading.value = false
-        }
     }
 }
 
 
-@Composable
-fun LazyColumnWithPagination(
-    transactions: List<TransactionDto>,
-    onLoadMore: () -> Unit,  // Вызывается для подгрузки данных
+
+suspend fun getTransactionsData(
+    client: InsultCensorClient?,
+    limit: Int,
+    onSuccess: (TransactionsResponse) -> Unit,
+    onError: (NetworkError?) -> Unit
 ) {
-    val listState = rememberLazyListState()
+    try {
+        val hash = org.example.project.Until.sha256(
+            org.example.project.Until.getDeviceId() +
+                    AppSettings.getString("token") +
+                    AppSettings.getInt("car_id").toString()
+        )
 
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(bottom = 16.dp)
-    ) {
-        // Группируем транзакции по дате
-        transactions.groupBy { it.dateNoSeconds().dateOnly() }.forEach { (date, txList) ->
-            item {
-                DateHeader(date)
-            }
-            items(txList) { tx ->
-                TransactionRow(tx = tx, onClick = {
-                    // Переход на экран с деталями транзакции
-                    //LocalNavigator.current?.push(TransactionDetailsScreen(tx))
-                })
-            }
-        }
+        val map = hashMapOf(
+            "Token" to AppSettings.getString("token"),
+            "DeviceId" to org.example.project.Until.getDeviceId(),
+            "CarId" to AppSettings.getInt("car_id").toString(),
+            "Limit" to limit,
+            "Hash" to hash
+        )
 
-        // Показ подгрузки данных при прокрутке
-        item {
-            if (listState.firstVisibleItemIndex + listState.layoutInfo.visibleItemsInfo.size >= transactions.size) {
-                onLoadMore()  // Если прокручено до конца — подгрузить новые данные
-            }
+
+        val result = client!!.request<TransactionsResponse>(
+            path = Constant.getTransactions,
+            params = map
+        )
+
+
+        result.onSuccess { body ->
+            onSuccess(body)
+        }?.onError { e ->
+            onError(e)
+        } ?: run {
+            onError(null)
         }
+    } catch (e: Throwable) {
+        onError(null)
     }
 }
-
-

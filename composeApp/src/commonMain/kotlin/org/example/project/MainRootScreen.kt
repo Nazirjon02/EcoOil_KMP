@@ -124,8 +124,10 @@ object HomeTab : Tab {
 
     @Composable
     override fun Content() {
+        val client = MainRootScreen.LocalClient.current
+
         val vm = LocalHomeVm.current
-        SGScreenMain(client = null, viewModel = vm!!)
+        SGScreenMain(client = client, viewModel = vm!!)
     }
 }
 

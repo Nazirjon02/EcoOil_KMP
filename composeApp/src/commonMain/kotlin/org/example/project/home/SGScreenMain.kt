@@ -252,7 +252,7 @@ fun SGScreenMain(
             LastTransactionsCard(
                 transactions = viewModel!!.transactions,
                 onOpenTransactions = {
-                    navigator?.parent?.push(TransactionsScreenParent())
+                    navigator?.parent?.push(TransactionsScreenParent(client!!))
                 },
                 onOpenTransactionDetails = { tx ->
                     navigator?.parent?.push(TransactionDetailsScreen(tx))
