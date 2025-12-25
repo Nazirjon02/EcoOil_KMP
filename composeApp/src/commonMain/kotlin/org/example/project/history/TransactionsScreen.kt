@@ -27,7 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,7 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.arrow_back_ios
@@ -73,6 +76,7 @@ class TransactionsScreenParent(
             client = client,
             transactions = transactions,
             viewModel = screenModel,
+            navigator = navigator,
             onBack = {
                 navigator.pop()
 
@@ -82,14 +86,19 @@ class TransactionsScreenParent(
 
 
 }
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun TransactionsScreen(
     client: InsultCensorClient?,
     transactions: List<TransactionDto>,
     viewModel: TransactionsScreenModel,
+    navigator: Navigator,
     onBack: () -> Unit  // Лямбда для кнопки назад
 ) {
+
+    BackHandler(enabled = true) {
+        onBack()
+    }
     val groupedTransactions = groupTransactionsByDate(transactions)
     val listState = rememberLazyListState()
     Scaffold(
@@ -133,7 +142,7 @@ fun TransactionsScreen(
                                 tx = tx,
                                 onClick = {
                                     // Навигация на экран с деталями транзакции
-                                    //LocalNavigator.current?.push(TransactionDetailsScreen(tx))
+                                   navigator.push(TransactionDetailsScreen(tx))
                                 }
                             )
                             Spacer(Modifier.height(12.dp))

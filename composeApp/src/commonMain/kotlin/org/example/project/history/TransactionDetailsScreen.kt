@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,12 +53,12 @@ class TransactionDetailsScreen(
     @Composable
     @Preview
     override fun Content() {
+        val navigator = LocalNavigator.currentOrThrow
 
         // ✅ Жест/системная кнопка "Назад" (Android back, iOS swipe-back где поддерживается)
-//        BackHandler(enabled = true) {
-//            onBack()
-//        }
-        val navigator = LocalNavigator.currentOrThrow
+        BackHandler(enabled = true) {
+            navigator.pop()
+        }
 
 
         val isShop = (tx.oilTypeName == "0")
@@ -84,14 +85,14 @@ class TransactionDetailsScreen(
                             Icon(
                                 painter = painterResource(Res.drawable.arrow_back_ios),
                                 contentDescription = "Назад",
-                                tint = Color.White,
+                                tint = Color.Black,
                                 modifier = Modifier.size(30.dp)
                             )
                         }
                     },
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = Color.White
+                        containerColor = Color.White,
+                        titleContentColor = Color.Black
                     )
                 )
             },
@@ -116,7 +117,7 @@ class TransactionDetailsScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .background(Color(0xFF00D4D4))
                             .padding(horizontal = 16.dp, vertical = 14.dp)
                     ) {
                         Column {
@@ -160,15 +161,22 @@ class TransactionDetailsScreen(
 
                         // Бейдж операции (ваш payTitle())
                         Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier.padding(start = 10.dp),
                             shape = RoundedCornerShape(999.dp)
                         ) {
-                            Text(
-                                text = tx.payTitle(),
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center // Центрирует содержимое внутри Row
+                            ) {
+                                Text(
+                                    text = tx.payTitle(),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+
+
                         }
                     }
 
