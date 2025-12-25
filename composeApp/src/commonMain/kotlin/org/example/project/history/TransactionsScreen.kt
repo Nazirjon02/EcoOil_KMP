@@ -23,20 +23,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.registry.screenModule
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -49,7 +44,6 @@ import org.example.data.TransactionDto
 import org.example.data.TransactionsResponse
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
-import org.example.project.home.TransactionRow
 import org.example.util.AppSettings
 import org.example.util.onError
 import org.example.util.onSuccess
@@ -96,9 +90,10 @@ fun TransactionsScreen(
     onBack: () -> Unit  // Лямбда для кнопки назад
 ) {
 
-    BackHandler(enabled = true) {
-        onBack()
-    }
+//    BackHandler(enabled = true) {
+//        onBack()
+//    }
+
     val groupedTransactions = groupTransactionsByDate(transactions)
     val listState = rememberLazyListState()
     Scaffold(

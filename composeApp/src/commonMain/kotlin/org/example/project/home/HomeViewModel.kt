@@ -19,21 +19,33 @@ import org.example.data.FuelItem
 import org.example.data.FuelItemCache
 import org.example.data.FuelType
 import org.example.data.HomeCache
+import org.example.data.ResponseStock
+import org.example.data.Stock
 import org.example.data.TransactionDto
 import org.example.data.icon
 import org.example.data.title
+import org.example.networking.Constant
 import org.example.networking.Constant.InvalidToken
 import org.example.networking.InsultCensorClient
 import org.example.project.history.getTransactions
 import org.example.util.AppSettings
+import org.example.util.AppSettings.loadStocksFromCache
 import org.example.util.AppSettings.loadTransactionsFromCache
+import org.example.util.AppSettings.saveStocksToCache
 import org.example.util.AppSettings.saveTransactionsToCache
 import org.example.util.NetworkError
+import org.example.util.onError
+import org.example.util.onSuccess
+
 class HomeViewModel(
     private val client: InsultCensorClient?
 ) : ViewModel() {
     var transactions by mutableStateOf<List<TransactionDto>>(emptyList())
         private set
+
+    var stocks by mutableStateOf<List<Stock>>(emptyList())
+        private set
+
     var userName by mutableStateOf("Test")
         private set
 
@@ -70,6 +82,8 @@ class HomeViewModel(
         } else if (fuelItems.isEmpty()) {
             loadFromNetwork(isFirstLaunch = false)
         }
+
+        stocks = loadStocksFromCache()
     }
 
     private fun loadDataFromSettings() {
@@ -98,20 +112,20 @@ class HomeViewModel(
         isRefreshMainScreen = true
 
         viewModelScope.launch {
-            val txResult = getTransactions(client,4)
 
-            when (txResult) {
-                is ApiCallResult.Success -> {
-                    val items = txResult.body.data.listTransaction
-                        .take(4) // гарантируем 4
-                    transactions = items
-                    saveTransactionsToCache(items)
+            requestStocks(
+                client = client,
+                onSuccess = { body ->
+                    val list = body.data.list_stock
+                    stocks = list
+                    saveStocksToCache(list)
+                },
+                onError = {
+                    // если сеть упала — оставляем кэш (stocks уже загружен из loadStocksFromCache())
                 }
-                is ApiCallResult.Failure -> {
-                    // если сеть упала — оставляем кеш (уже загружен в init)
-                    // при желании можешь показать toast
-                }
-            }
+            )
+
+
 
             requestCarData(
                 client = client,
@@ -175,6 +189,22 @@ class HomeViewModel(
 
                 }
             )
+
+            val txResult = getTransactions(client,4)
+
+            when (txResult) {
+                is ApiCallResult.Success -> {
+                    val items = txResult.body.data.listTransaction
+                        .take(4) // гарантируем 4
+                    transactions = items
+                    saveTransactionsToCache(items)
+                }
+                is ApiCallResult.Failure -> {
+                    // если сеть упала — оставляем кеш (уже загружен в init)
+                    // при желании можешь показать toast
+                }
+            }
+
             isRefreshMainScreen = false
         }
     }
@@ -229,6 +259,44 @@ private fun loadFuelItemsFromSettings(): List<FuelItem> {
     }
 }
 
+
+
+suspend fun requestStocks(
+    client: InsultCensorClient?,
+    onSuccess: (ResponseStock) -> Unit,
+    onError: (NetworkError?) -> Unit
+) {
+    try {
+        val hash = org.example.project.Until.sha256(
+            AppSettings.getInt("car_id").toString() +
+                    AppSettings.getString("token") +
+                    org.example.project.Until.getDeviceId()
+        )
+
+        val map = hashMapOf(
+            "Token" to AppSettings.getString("token"),
+            "DeviceId" to org.example.project.Until.getDeviceId(),
+            "CarId" to AppSettings.getInt("car_id").toString(),
+            "Limit" to 8,
+            "Hash" to hash
+        )
+
+        val result = client?.request<ResponseStock>(
+            path = Constant.getStocks,
+            params = map,
+        )
+
+        result?.onSuccess { body ->
+            onSuccess(body)
+        }?.onError { e ->
+            onError(e)
+        } ?: run {
+            onError(null)
+        }
+    } catch (e: Throwable) {
+        onError(null)
+    }
+}
 
 
 

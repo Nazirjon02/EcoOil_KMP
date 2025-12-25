@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.accompanist.permissions)
 
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+            implementation("media.kamel:kamel-image:0.9.5")
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)

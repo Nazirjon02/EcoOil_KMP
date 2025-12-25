@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -15,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,21 +27,16 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ecooil_kmp.composeapp.generated.resources.Res
 import ecooil_kmp.composeapp.generated.resources.ecooil_text
-import ecooil_kmp.composeapp.generated.resources.ic_ai92
 import ecooil_kmp.composeapp.generated.resources.icon_dt
 import ecooil_kmp.composeapp.generated.resources.notification
-import ecooil_kmp.composeapp.generated.resources.right_arrow
 import ecooil_kmp.composeapp.generated.resources.user
-import org.example.data.ApiCallResult
 import org.example.data.CarResponse
-import org.example.data.TransactionsResponse
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
+import org.example.project.history.LastTransactionsCard
 import org.example.project.history.TransactionDetailsScreen
-import org.example.project.history.TransactionsScreen
 import org.example.project.history.TransactionsScreenParent
 import org.example.project.login.AuthScreen
-import org.example.project.until.ShimmerEffect
 import org.example.util.AppSettings
 import org.example.util.NetworkError
 import org.example.util.onError
@@ -160,22 +153,13 @@ fun SGScreenMain(
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
-                modifier = Modifier.padding(vertical = 12.dp),
-
-                ) {
-                items(5) {
-                    Card(
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.size(80.dp),
-                        elevation = CardDefaults.cardElevation(6.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.icon_dt),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-
-                        )
-                    }
+                modifier = Modifier.padding(vertical = 12.dp)
+            ) {
+                items(viewModel!!.stocks, key = { it.stock_image }) { item ->
+                    StockImageCard(
+                        item = item,
+                        onClick = {navigator!!.parent!!.push(StockDetailsScreen(item)) }
+                    )
                 }
             }
 

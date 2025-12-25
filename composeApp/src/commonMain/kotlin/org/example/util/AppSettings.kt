@@ -3,6 +3,7 @@ package org.example.util
 import com.russhwolf.settings.Settings
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.example.data.Stock
 import org.example.data.TransactionDto
 import org.example.data.TransactionsCache
 
@@ -130,5 +131,18 @@ object AppSettings {
             emptyList()
         }
     }
+
+    private const val STOCKS_CACHE_KEY = "stocks_cache_v1"
+
+    fun saveStocksToCache(list: List<Stock>) {
+        AppSettings.putString(STOCKS_CACHE_KEY, Json.encodeToString(list))
+    }
+
+    fun loadStocksFromCache(): List<Stock> {
+        val json = AppSettings.getString(STOCKS_CACHE_KEY, "")
+        if (json.isBlank()) return emptyList()
+        return runCatching { Json.decodeFromString<List<Stock>>(json) }.getOrDefault(emptyList())
+    }
+
 }
 

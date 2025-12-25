@@ -1,4 +1,4 @@
-package org.example.project.home
+package org.example.project.history
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,25 +29,20 @@ import ecooil_kmp.composeapp.generated.resources.ic_dt
 import ecooil_kmp.composeapp.generated.resources.ic_dtecto
 import ecooil_kmp.composeapp.generated.resources.ic_gas
 import org.example.data.TransactionDto
-import org.example.data.formatMoneyKmp
-import org.example.data.orDash
 import org.example.data.toDoubleSafe
 import org.jetbrains.compose.resources.painterResource
 
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.ui.text.style.TextOverflow
 import ecooil_kmp.composeapp.generated.resources.icon_shop
 import org.example.data.amountUi
-import org.example.data.bonusOnlyText
 import org.example.data.bonusText
 import org.example.data.dateNoSeconds
 import org.example.data.oilSizeCompleted
 import org.example.data.payTitle
 import org.example.data.productName
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -231,7 +226,7 @@ Column(modifier = Modifier.weight(1f).padding(end = 3.dp)) {
 }
 }
 
-private fun resolveIcon(tx: TransactionDto): org.jetbrains.compose.resources.DrawableResource {
+private fun resolveIcon(tx: TransactionDto): DrawableResource {
     val t = tx.oilTypeName?.trim().orEmpty()
 
 
