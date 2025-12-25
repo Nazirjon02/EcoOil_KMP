@@ -39,6 +39,7 @@ import org.example.data.CarResponse
 import org.example.data.TransactionsResponse
 import org.example.networking.Constant
 import org.example.networking.InsultCensorClient
+import org.example.project.history.TransactionDetailsScreen
 import org.example.project.history.TransactionsScreen
 import org.example.project.history.TransactionsScreenParent
 import org.example.project.login.AuthScreen
@@ -182,7 +183,7 @@ fun SGScreenMain(
 
             // ---- ТОПЛИВО ----
             Text(
-                "Деньги на топливо", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+                "Расходы на топливо в этом месяце", fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(16.dp, 0.dp)
             )
 

@@ -53,6 +53,7 @@ kotlin {
             api("cafe.adriel.voyager:voyager-bottom-sheet-navigator:1.0.0")
             api("cafe.adriel.voyager:voyager-tab-navigator:1.0.0")
             api("cafe.adriel.voyager:voyager-transitions:1.0.0")
+            api("cafe.adriel.voyager:voyager-screenmodel:1.0.0")
 
             implementation(libs.multiplatform.settings.no.arg)
 
