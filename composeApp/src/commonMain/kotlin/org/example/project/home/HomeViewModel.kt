@@ -166,9 +166,16 @@ class HomeViewModel(
                         AppSettings.putBoolean("isFirstLaunch", false)
                     }
 
-                    if (fuelItems.isNotEmpty()) {
-                        fuelItems = fuelItems
-                        saveFuelItems(fuelItems) // ✅ сохраняем
+//                    if (fuelItems.isNotEmpty()) {
+//                        fuelItems = fuelItems
+//                        saveFuelItems(fuelItems) // ✅ сохраняем
+//                    }
+
+                    newCache.fuelItems.let { items ->
+                        if (items.isNotEmpty()) {
+                            fuelItems = items
+                            saveFuelItems(items) // ✅ сохраняем реальные данные
+                        }
                     }
 
                     // Кэшируем данные
