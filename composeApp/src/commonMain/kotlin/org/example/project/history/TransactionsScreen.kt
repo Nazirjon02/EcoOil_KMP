@@ -133,10 +133,8 @@ fun TransactionsScreen(
                     groupedTransactions.forEach { (date, transactionsList) ->
                         item { DateHeader(date) }
                         items(transactionsList) { tx ->
-                            TransactionRow(
-                                tx = tx,
-                                onClick = {
-                                    // Навигация на экран с деталями транзакции
+                            TransactionRow(tx = tx,
+                                onClick = { // Навигация на экран с деталями транзакции
                                    navigator.push(TransactionDetailsScreen(tx))
                                 }
                             )

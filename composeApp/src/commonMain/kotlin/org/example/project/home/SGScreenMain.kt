@@ -37,6 +37,7 @@ import org.example.project.history.LastTransactionsCard
 import org.example.project.history.TransactionDetailsScreen
 import org.example.project.history.TransactionsScreenParent
 import org.example.project.login.AuthScreen
+import org.example.project.notification.HistoryTabsParentScreen
 import org.example.util.AppSettings
 import org.example.util.NetworkError
 import org.example.util.onError
@@ -86,7 +87,14 @@ fun SGScreenMain(
                     navigator?.parent?.push(InfoScreen)
                     /* открыть профиль */
                 },
-                onNotificationClick = { /* открыть уведомления */ }
+                onNotificationClick = {
+                    navigator?.parent?.push(
+                        HistoryTabsParentScreen(
+                            transactions = viewModel!!.transactions,
+                            stocks = viewModel.stocks
+                        )
+                    )
+                }
             )
 
             // ---- TOP CARD ----

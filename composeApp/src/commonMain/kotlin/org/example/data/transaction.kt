@@ -94,23 +94,6 @@ data class TransactionUiModel(
     val returnStatus: Int
 )
 
-//fun TransactionDto.toUi(): TransactionUiModel {
-//    return TransactionUiModel(
-//        id = idTransaction.toLong(),
-//        station = oilStationName,
-//        dateTime = dateTime,
-//        oilType = oilTypeName,
-//        price = oilPrice.toDoubleSafe(),
-//        volume = oilSizeCompleted.toDoubleSafe(),
-//        amount = oilSummaCompleted.toDoubleSafe(),
-//        takenFromPip = takePip.toDoubleSafe(),
-//        takenFromBalance = takeBalance.toDoubleSafe(),
-//        pipStatus = pipStatusType,
-//        payStatus = payStatus,
-//        payName = payName,
-//        returnStatus = returnStatus
-//    )
-//}
 
 fun TransactionDto.productName(): String {
     val t = oilTypeName?.trim().orEmpty()
