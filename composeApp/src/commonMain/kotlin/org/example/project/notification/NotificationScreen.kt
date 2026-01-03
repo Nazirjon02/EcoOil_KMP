@@ -26,7 +26,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -54,18 +56,26 @@ class HistoryTabsParentScreen(
             stocks = stocks,
             onStockClick = { stock ->
 
+            },
+            onBack = {
+                navigator.pop()
             }
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HistoryTabsScreen(
     transactions: List<TransactionDto>,
     stocks: List<Stock>,
-    onStockClick: (Stock) -> Unit
+    onStockClick: (Stock) -> Unit,
+    onBack: () -> Unit
 ) {
+
+    BackHandler(enabled = true) {
+        onBack()
+    }
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Уведомления", "Акции")
     val navigator = LocalNavigator.currentOrThrow

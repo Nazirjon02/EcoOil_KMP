@@ -27,6 +27,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,9 +91,9 @@ fun TransactionsScreen(
     onBack: () -> Unit  // Лямбда для кнопки назад
 ) {
 
-//    BackHandler(enabled = true) {
-//        onBack()
-//    }
+    BackHandler(enabled = true) {
+        onBack()
+    }
 
     val groupedTransactions = groupTransactionsByDate(transactions)
     val listState = rememberLazyListState()
