@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,9 +55,9 @@ class TransactionDetailsScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         // ✅ Жест/системная кнопка "Назад" (Android back, iOS swipe-back где поддерживается)
-        BackHandler(enabled = true) {
-            navigator.pop()
-        }
+//        BackHandler(enabled = true) {
+//            navigator.pop()
+//        }
 
 
         val isShop = (tx.oilTypeName == "0")

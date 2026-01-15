@@ -182,7 +182,8 @@ fun AppContent(client: InsultCensorClient?,navigator: Navigator?) {
                                         Text(
                                             "+992",
                                             color = Color(0xFF00A8A8),
-                                            fontWeight = FontWeight.Medium
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.padding(start = 15.dp)
                                         )
                                     } else {
                                         Icon(

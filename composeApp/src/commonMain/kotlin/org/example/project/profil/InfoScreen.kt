@@ -7,7 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
@@ -66,9 +65,9 @@ object InfoScreen : Tab {
 fun InfoScreenContent(onExit: () -> Unit = {} ,onBackAction: () -> Unit = {} ) {
     val scrollState = rememberScrollState()
 
-    BackHandler(enabled = true) {
-        onBackAction()
-    }
+//    BackHandler(enabled = true) {
+//        onBackAction()
+//    }
 
     Column(
         modifier = Modifier
